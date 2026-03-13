@@ -8,7 +8,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>R4PDF</PackageId>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <Authors>R4PDF Contributors</Authors>
     <Description>Convert JSON templates into fully customizable PDFs. Template-driven PDF generation with support for text, tables, images, headers/footers, and rich styling.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
