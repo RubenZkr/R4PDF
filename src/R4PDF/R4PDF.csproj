@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
 
     <!-- NuGet Package Metadata -->
     <PackageId>R4PDF</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>R4PDF Contributors</Authors>
     <Description>Convert JSON templates into fully customizable PDFs. Template-driven PDF generation with support for text, tables, images, headers/footers, and rich styling.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
