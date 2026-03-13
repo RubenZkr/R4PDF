@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+
+# NuGet
+*.nupkg
+*.snupkg
+nupkg/
+packages/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*~
+
+# Test results
+TestResults/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db

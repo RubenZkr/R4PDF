@@ -1,0 +1,80 @@
+{
+    "metadata": {
+        "title": "Quarterly Report Q4 2024",
+        "author": "Analytics Team"
+    },
+    "settings": {
+        "pageSize": "A4",
+        "orientation": "Portrait",
+        "margins": { "top": "25mm", "bottom": "25mm", "left": "20mm", "right": "20mm" }
+    },
+    "styles": {
+        "heading1": { "fontSize": 22, "fontWeight": "bold", "color": "#1a1a2e" },
+        "heading2": { "fontSize": 16, "fontWeight": "bold", "color": "#16213e" },
+        "bodyText": { "fontSize": 11, "color": "#333333", "lineHeight": 1.5 },
+        "caption": { "fontSize": 9, "color": "#888888" }
+    },
+    "pages": [
+        {
+            "body": {
+                "elements": [
+                    { "type": "rectangle", "fillColor": "#1a1a2e", "width": "170mm", "height": "60mm" },
+                    { "type": "text", "text": "Quarterly Report", "fontSize": 28, "fontWeight": "bold", "color": "#1a1a2e" },
+                    { "type": "text", "text": "Q4 2024 | ${company.name}", "fontSize": 16, "color": "#666666" },
+                    { "type": "text", "text": "Prepared by: ${report.author}", "fontSize": 12, "color": "#888888" },
+                    { "type": "text", "text": "Date: ${report.date}", "fontSize": 12, "color": "#888888" }
+                ]
+            }
+        },
+        {
+            "header": {
+                "height": "15mm",
+                "elements": [
+                    { "type": "text", "text": "Quarterly Report Q4 2024", "fontSize": 9, "color": "#999999" }
+                ]
+            },
+            "body": {
+                "elements": [
+                    { "type": "text", "text": "Executive Summary", "style": "heading1" },
+                    { "type": "line", "color": "#1a1a2e", "strokeWidth": "1pt" },
+                    {
+                        "type": "paragraph",
+                        "content": "This report summarizes the key performance indicators and financial results for Q4 2024. Overall, the company demonstrated strong growth across all major business segments, exceeding revenue targets by 12% and maintaining healthy profit margins.",
+                        "style": "bodyText"
+                    },
+                    { "type": "text", "text": "" },
+                    { "type": "text", "text": "Key Metrics", "style": "heading2" },
+                    {
+                        "type": "table",
+                        "columns": [
+                            { "name": "Metric", "width": "40%" },
+                            { "name": "Q3 2024", "width": "20%", "alignment": "right" },
+                            { "name": "Q4 2024", "width": "20%", "alignment": "right" },
+                            { "name": "Change", "width": "20%", "alignment": "right" }
+                        ],
+                        "rows": [
+                            { "cells": ["Revenue", "$2.4M", "$2.8M", "+16.7%"] },
+                            { "cells": ["Net Profit", "$480K", "$560K", "+16.7%"] },
+                            { "cells": ["Active Users", "12,500", "15,200", "+21.6%"] },
+                            { "cells": ["Churn Rate", "3.2%", "2.8%", "-12.5%"] },
+                            { "cells": ["NPS Score", "72", "78", "+8.3%"] }
+                        ],
+                        "headerStyle": {
+                            "backgroundColor": "#16213e",
+                            "color": "#FFFFFF",
+                            "fontWeight": "bold"
+                        },
+                        "alternateRowColors": true,
+                        "alternateColor": "#F5F5F5"
+                    }
+                ]
+            },
+            "footer": {
+                "height": "15mm",
+                "elements": [
+                    { "type": "text", "text": "Confidential | Page {pageNumber} of {pageCount}", "style": "caption", "alignment": "center" }
+                ]
+            }
+        }
+    ]
+}

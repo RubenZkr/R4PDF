@@ -1,0 +1,78 @@
+{
+    "metadata": {
+        "title": "Invoice #2024-001",
+        "author": "Acme Corp"
+    },
+    "settings": {
+        "pageSize": "A4",
+        "orientation": "Portrait",
+        "margins": { "top": "20mm", "bottom": "20mm", "left": "15mm", "right": "15mm" }
+    },
+    "styles": {
+        "title": { "fontSize": 24, "fontWeight": "bold", "color": "#003366" },
+        "subtitle": { "fontSize": 14, "color": "#666666" },
+        "label": { "fontSize": 10, "fontWeight": "bold", "color": "#333333" },
+        "value": { "fontSize": 10, "color": "#000000" },
+        "footer": { "fontSize": 9, "color": "#999999", "alignment": "center" }
+    },
+    "pages": [
+        {
+            "header": {
+                "height": "40mm",
+                "elements": [
+                    { "type": "text", "text": "ACME CORPORATION", "style": "title" },
+                    { "type": "text", "text": "123 Business Ave, Suite 100, New York, NY 10001", "style": "subtitle" },
+                    { "type": "line", "color": "#003366", "strokeWidth": "2pt" }
+                ]
+            },
+            "body": {
+                "elements": [
+                    { "type": "text", "text": "INVOICE", "fontSize": 20, "fontWeight": "bold", "color": "#003366" },
+                    { "type": "text", "text": "Invoice #: ${invoice.number}", "style": "value" },
+                    { "type": "text", "text": "Date: ${invoice.date}", "style": "value" },
+                    { "type": "text", "text": "Due Date: ${invoice.dueDate}", "style": "value" },
+                    { "type": "text", "text": "" },
+                    { "type": "text", "text": "Bill To:", "style": "label" },
+                    { "type": "text", "text": "${customer.name}", "style": "value" },
+                    { "type": "text", "text": "${customer.address}", "style": "value" },
+                    { "type": "text", "text": "" },
+                    {
+                        "type": "table",
+                        "columns": [
+                            { "name": "Description", "width": "45%" },
+                            { "name": "Quantity", "width": "15%", "alignment": "center" },
+                            { "name": "Unit Price", "width": "20%", "alignment": "right" },
+                            { "name": "Total", "width": "20%", "alignment": "right" }
+                        ],
+                        "rows": [
+                            { "cells": ["Web Development Services", "40", "$150.00", "$6,000.00"] },
+                            { "cells": ["UI/UX Design", "20", "$120.00", "$2,400.00"] },
+                            { "cells": ["Project Management", "10", "$100.00", "$1,000.00"] },
+                            { "cells": ["Server Hosting (Annual)", "1", "$500.00", "$500.00"] }
+                        ],
+                        "headerStyle": {
+                            "backgroundColor": "#003366",
+                            "color": "#FFFFFF",
+                            "fontWeight": "bold"
+                        },
+                        "alternateRowColors": true,
+                        "alternateColor": "#F0F4F8"
+                    },
+                    { "type": "text", "text": "" },
+                    { "type": "line", "color": "#CCCCCC", "strokeWidth": "0.5pt" },
+                    { "type": "text", "text": "Subtotal: $9,900.00", "fontSize": 11, "alignment": "right" },
+                    { "type": "text", "text": "Tax (8%): $792.00", "fontSize": 11, "alignment": "right" },
+                    { "type": "text", "text": "Total: $10,692.00", "fontSize": 14, "fontWeight": "bold", "alignment": "right", "color": "#003366" }
+                ]
+            },
+            "footer": {
+                "height": "20mm",
+                "elements": [
+                    { "type": "line", "color": "#CCCCCC", "strokeWidth": "0.5pt" },
+                    { "type": "text", "text": "Thank you for your business!", "style": "footer" },
+                    { "type": "text", "text": "Page {pageNumber} of {pageCount}", "style": "footer" }
+                ]
+            }
+        }
+    ]
+}
