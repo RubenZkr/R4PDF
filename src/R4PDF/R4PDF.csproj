@@ -12,6 +12,7 @@
     <Authors>R4PDF Contributors</Authors>
     <Description>Convert JSON templates into fully customizable PDFs. Template-driven PDF generation with support for text, tables, images, headers/footers, and rich styling.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://ruben-vermeulen.nl/r4pdf</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>pdf;json;pdf-generation;template;report</PackageTags>
     <IsPackable>true</IsPackable>
