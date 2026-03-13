@@ -108,20 +108,37 @@ public class TableRenderer
             headerBgColor = ColorParser.Parse(table.HeaderStyle.BackgroundColor, XColors.DarkGray);
         }
 
-        var rowHeight = headerFont.Height + DefaultCellPadding * 2;
+        var lineHeight = headerFont.Height;
+
+        // Pre-compute wrapped lines for each header cell to determine row height
+        var wrappedHeaders = new List<string>[table.Columns.Count];
+        int maxLines = 1;
+        for (int i = 0; i < table.Columns.Count; i++)
+        {
+            var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
+            wrappedHeaders[i] = WrapText(gfx, table.Columns[i].Name, headerFont, cellWidth);
+            if (wrappedHeaders[i].Count > maxLines)
+                maxLines = wrappedHeaders[i].Count;
+        }
+
+        var rowHeight = lineHeight * maxLines + DefaultCellPadding * 2;
         double currentX = x;
 
         // Draw header background
         gfx.DrawRectangle(new XSolidBrush(headerBgColor), x, y, columnWidths.Sum(), rowHeight);
 
-        // Draw header cells
+        // Draw header cells with wrapped text
         for (int i = 0; i < table.Columns.Count; i++)
         {
-            var cellRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding,
-                columnWidths[i] - DefaultCellPadding * 2, rowHeight - DefaultCellPadding * 2);
-
             var format = GetCellFormat(table.Columns[i].Alignment);
-            gfx.DrawString(table.Columns[i].Name, headerFont, headerBrush, cellRect, format);
+            var lines = wrappedHeaders[i];
+
+            for (int li = 0; li < lines.Count; li++)
+            {
+                var lineRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding + li * lineHeight,
+                    columnWidths[i] - DefaultCellPadding * 2, lineHeight);
+                gfx.DrawString(lines[li], headerFont, headerBrush, lineRect, format);
+            }
 
             if (borderPen != null)
                 gfx.DrawRectangle(borderPen, currentX, y, columnWidths[i], rowHeight);
@@ -137,7 +154,23 @@ public class TableRenderer
     {
         var font = new XFont("Helvetica", 11);
         var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
-        var rowHeight = font.Height + DefaultCellPadding * 2;
+        var lineHeight = font.Height;
+
+        // Pre-compute wrapped lines for each cell to determine row height
+        var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
+        var wrappedCells = new List<string>[cellCount];
+        int maxLines = 1;
+
+        for (int i = 0; i < cellCount; i++)
+        {
+            var cellText = row.Cells[i] ?? "";
+            var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
+            wrappedCells[i] = WrapText(gfx, cellText, font, cellWidth);
+            if (wrappedCells[i].Count > maxLines)
+                maxLines = wrappedCells[i].Count;
+        }
+
+        var rowHeight = lineHeight * maxLines + DefaultCellPadding * 2;
         double currentX = x;
 
         // Draw row background
@@ -146,15 +179,19 @@ public class TableRenderer
             gfx.DrawRectangle(rowBackground, x, y, columnWidths.Sum(), rowHeight);
         }
 
-        // Draw cells
-        for (int i = 0; i < Math.Min(row.Cells.Count, table.Columns.Count); i++)
+        // Draw cells with wrapped text
+        for (int i = 0; i < cellCount; i++)
         {
-            var cellRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding,
-                columnWidths[i] - DefaultCellPadding * 2, rowHeight - DefaultCellPadding * 2);
-
             var alignment = i < table.Columns.Count ? table.Columns[i].Alignment : null;
             var format = GetCellFormat(alignment);
-            gfx.DrawString(row.Cells[i] ?? "", font, textBrush, cellRect, format);
+            var lines = wrappedCells[i];
+
+            for (int li = 0; li < lines.Count; li++)
+            {
+                var lineRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding + li * lineHeight,
+                    columnWidths[i] - DefaultCellPadding * 2, lineHeight);
+                gfx.DrawString(lines[li], font, textBrush, lineRect, format);
+            }
 
             if (borderPen != null)
                 gfx.DrawRectangle(borderPen, currentX, y, columnWidths[i], rowHeight);
@@ -185,5 +222,42 @@ public class TableRenderer
             _ => XStringAlignment.Near,
         };
         return format;
+    }
+
+    private static List<string> WrapText(XGraphics gfx, string text, XFont font, double maxWidth)
+    {
+        var lines = new List<string>();
+        if (string.IsNullOrEmpty(text))
+        {
+            lines.Add(string.Empty);
+            return lines;
+        }
+
+        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var currentLine = "";
+
+        foreach (var word in words)
+        {
+            var testLine = currentLine.Length == 0 ? word : $"{currentLine} {word}";
+            var size = gfx.MeasureString(testLine, font);
+
+            if (size.Width > maxWidth && currentLine.Length > 0)
+            {
+                lines.Add(currentLine);
+                currentLine = word;
+            }
+            else
+            {
+                currentLine = testLine;
+            }
+        }
+
+        if (currentLine.Length > 0)
+            lines.Add(currentLine);
+
+        if (lines.Count == 0)
+            lines.Add(string.Empty);
+
+        return lines;
     }
 }
