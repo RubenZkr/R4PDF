@@ -36,11 +36,12 @@ public class SystemFontResolver : IFontResolver
     // Font names that should be mapped to Liberation Sans
     private static readonly HashSet<string> SansSerifAliases = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Helvetica", "Arial", "Liberation Sans", "sans-serif", "Verdana",
-        "Tahoma", "Segoe UI", "Calibri",
+        FontFamilies.Helvetica, FontFamilies.Arial, FontFamilies.LiberationSans,
+        FontFamilies.SansSerif, FontFamilies.Verdana, FontFamilies.Tahoma,
+        FontFamilies.SegoeUI, FontFamilies.Calibri,
     };
 
-    public string DefaultFontName => "Liberation Sans";
+    public string DefaultFontName => FontFamilies.LiberationSans;
 
     public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
     {

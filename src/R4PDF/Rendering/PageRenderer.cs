@@ -53,7 +53,7 @@ public class PageRenderer
         {
             var footerHeight = page.Footer.Height != null
                 ? UnitConverter.ToPoints(page.Footer.Height)
-                : 30;
+                : PdfDefaults.DefaultFooterHeight;
 
             var footerY = pageHeight - marginBottom - footerHeight;
             RenderSection(gfx, page.Footer, marginLeft, footerY, contentWidth, pageNumber, pageCount);
@@ -107,8 +107,8 @@ public class PageRenderer
     {
         // Replace page number placeholders
         var resolvedText = text.Text
-            .Replace("{pageNumber}", pageNumber.ToString())
-            .Replace("{pageCount}", pageCount.ToString());
+            .Replace(Placeholders.PageNumber, pageNumber.ToString())
+            .Replace(Placeholders.PageCount, pageCount.ToString());
 
         var original = text.Text;
         text.Text = resolvedText;
@@ -120,8 +120,8 @@ public class PageRenderer
     private double RenderParagraph(XGraphics gfx, ParagraphElement para, ResolvedStyle style, double x, double y, double contentWidth, int pageNumber, int pageCount)
     {
         var resolvedContent = para.Content
-            .Replace("{pageNumber}", pageNumber.ToString())
-            .Replace("{pageCount}", pageCount.ToString());
+            .Replace(Placeholders.PageNumber, pageNumber.ToString())
+            .Replace(Placeholders.PageCount, pageCount.ToString());
 
         var original = para.Content;
         para.Content = resolvedContent;

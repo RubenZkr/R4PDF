@@ -51,9 +51,9 @@ public class ImageRenderer
 
         // Handle alignment
         var drawX = x;
-        if (element.Alignment?.Equals("center", StringComparison.OrdinalIgnoreCase) == true)
+        if (element.Alignment?.Equals(Alignments.Center, StringComparison.OrdinalIgnoreCase) == true)
             drawX = x + (availableWidth - targetWidth) / 2;
-        else if (element.Alignment?.Equals("right", StringComparison.OrdinalIgnoreCase) == true)
+        else if (element.Alignment?.Equals(Alignments.Right, StringComparison.OrdinalIgnoreCase) == true)
             drawX = x + availableWidth - targetWidth;
 
         gfx.DrawImage(image, drawX, y, targetWidth, targetHeight);

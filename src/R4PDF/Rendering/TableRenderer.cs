@@ -7,7 +7,7 @@ namespace R4PDF.Rendering;
 
 public class TableRenderer
 {
-    private const double DefaultCellPadding = 4;
+    private const double DefaultCellPadding = PdfDefaults.TableCellPadding;
 
     public double Render(XGraphics gfx, TableElement table, ResolvedStyle style, double x, double y, double availableWidth)
     {
@@ -91,16 +91,16 @@ public class TableRenderer
 
     private double RenderHeaderRow(XGraphics gfx, TableElement table, double[] columnWidths, double x, double y, XPen? borderPen)
     {
-        var headerFont = new XFont("Helvetica", 12, XFontStyle.Bold);
+        var headerFont = new XFont(FontFamilies.Helvetica, PdfDefaults.TableHeaderFontSize, XFontStyle.Bold);
         var headerBrush = XBrushes.White;
         var headerBgColor = XColors.DarkGray;
 
         if (table.HeaderStyle != null)
         {
-            var fontFamily = table.HeaderStyle.FontFamily ?? "Helvetica";
-            var fontSize = table.HeaderStyle.FontSize ?? 12;
+            var fontFamily = table.HeaderStyle.FontFamily ?? FontFamilies.Helvetica;
+            var fontSize = table.HeaderStyle.FontSize ?? PdfDefaults.TableHeaderFontSize;
             var fontStyle = XFontStyle.Regular;
-            if (table.HeaderStyle.FontWeight?.Equals("bold", StringComparison.OrdinalIgnoreCase) == true)
+            if (table.HeaderStyle.FontWeight?.Equals(FontWeights.Bold, StringComparison.OrdinalIgnoreCase) == true)
                 fontStyle |= XFontStyle.Bold;
 
             headerFont = new XFont(fontFamily, fontSize, fontStyle);
@@ -152,7 +152,7 @@ public class TableRenderer
     private double RenderDataRow(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
         double x, double y, XPen? borderPen, XBrush? rowBackground)
     {
-        var font = new XFont("Helvetica", 11);
+        var font = new XFont(FontFamilies.Helvetica, PdfDefaults.TableDataFontSize);
         var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
         var lineHeight = font.Height;
 
@@ -205,10 +205,10 @@ public class TableRenderer
     private static XPen? ResolveBorderPen(BorderStyle? borders)
     {
         if (borders == null)
-            return new XPen(XColors.LightGray, 0.5);
+            return new XPen(XColors.LightGray, PdfDefaults.BorderWidth);
 
         var color = ColorParser.Parse(borders.Color, XColors.LightGray);
-        var width = UnitConverter.ToPoints(borders.Width, 0.5);
+        var width = UnitConverter.ToPoints(borders.Width, PdfDefaults.BorderWidth);
         return new XPen(color, width);
     }
 
@@ -217,8 +217,8 @@ public class TableRenderer
         var format = new XStringFormat { LineAlignment = XLineAlignment.Center };
         format.Alignment = alignment?.ToLowerInvariant() switch
         {
-            "center" => XStringAlignment.Center,
-            "right" => XStringAlignment.Far,
+            Alignments.Center => XStringAlignment.Center,
+            Alignments.Right => XStringAlignment.Far,
             _ => XStringAlignment.Near,
         };
         return format;

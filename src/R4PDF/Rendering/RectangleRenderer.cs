@@ -9,7 +9,7 @@ public class RectangleRenderer
     public double Render(XGraphics gfx, RectangleElement element, double x, double y, double availableWidth)
     {
         var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : availableWidth;
-        var height = element.Height != null ? UnitConverter.ToPoints(element.Height) : 20;
+        var height = element.Height != null ? UnitConverter.ToPoints(element.Height) : PdfDefaults.DefaultRectangleHeight;
 
         var drawX = element.X != null ? UnitConverter.ToPoints(element.X) : x;
         var drawY = element.Y != null ? UnitConverter.ToPoints(element.Y) : y;
@@ -21,7 +21,7 @@ public class RectangleRenderer
         XPen? strokePen = null;
         if (element.StrokeColor != null)
         {
-            var strokeWidth = UnitConverter.ToPoints(element.StrokeWidth, 1.0);
+            var strokeWidth = UnitConverter.ToPoints(element.StrokeWidth, PdfDefaults.DefaultStrokeWidth);
             strokePen = new XPen(ColorParser.Parse(element.StrokeColor), strokeWidth);
         }
 

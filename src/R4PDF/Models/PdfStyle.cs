@@ -13,10 +13,3 @@ public class PdfStyle
     public string? Padding { get; set; }
     public BorderStyle? Border { get; set; }
 }
-
-public class BorderStyle
-{
-    public string? Width { get; set; }
-    public string? Color { get; set; }
-    public string Type { get; set; } = "all";
-}

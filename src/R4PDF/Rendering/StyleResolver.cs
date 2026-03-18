@@ -1,6 +1,5 @@
 using R4PDF.Models;
 using R4PDF.Models.Elements;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
@@ -70,43 +69,5 @@ public class StyleResolver
                 if (para.LineHeight.HasValue) resolved.LineHeight = para.LineHeight.Value;
                 break;
         }
-    }
-}
-
-public class ResolvedStyle
-{
-    public string FontFamily { get; set; } = "Liberation Sans";
-    public double FontSize { get; set; } = 12;
-    public string FontWeight { get; set; } = "normal";
-    public string FontStyle { get; set; } = "normal";
-    public string? Color { get; set; }
-    public string? BackgroundColor { get; set; }
-    public string Alignment { get; set; } = "left";
-    public double LineHeight { get; set; } = 1.2;
-
-    public XFont ToXFont()
-    {
-        var style = XFontStyle.Regular;
-        if (FontWeight?.Equals("bold", StringComparison.OrdinalIgnoreCase) == true)
-            style |= XFontStyle.Bold;
-        if (FontStyle?.Equals("italic", StringComparison.OrdinalIgnoreCase) == true)
-            style |= XFontStyle.Italic;
-
-        return new XFont(FontFamily, FontSize, style);
-    }
-
-    public XStringFormat ToXStringFormat()
-    {
-        var format = new XStringFormat();
-
-        format.Alignment = Alignment?.ToLowerInvariant() switch
-        {
-            "center" => XStringAlignment.Center,
-            "right" => XStringAlignment.Far,
-            _ => XStringAlignment.Near,
-        };
-
-        format.LineAlignment = XLineAlignment.Near;
-        return format;
     }
 }

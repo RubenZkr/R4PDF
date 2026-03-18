@@ -2,6 +2,11 @@
 
 A free, open-source .NET 8, 9. 10 library that converts JSON templates into fully customizable PDFs. No paid licenses — just define your layout in JSON and generate PDFs.
 
+## Links
+
+- Repository: https://github.com/RubenZkr/R4PDF
+- Issues: https://github.com/RubenZkr/R4PDF/issues
+
 ## Installation
 
 ```bash
