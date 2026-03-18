@@ -44,25 +44,7 @@ public class PdfGenerator
             var template = TemplateParser.Parse(boundJson);
 
             // Phase 3: Render to PDF
-            using var document = CreatePdfDocument(template);
-            var styleResolver = new StyleResolver(template.Styles);
-            var pageRenderer = new PageRenderer(styleResolver);
-
-            int pageCount = template.Pages.Count;
-
-            for (int i = 0; i < template.Pages.Count; i++)
-            {
-                var pageDefinition = template.Pages[i];
-                var settings = pageDefinition.Settings ?? template.Settings;
-
-                var pdfPage = document.AddPage();
-                ConfigurePage(pdfPage, settings);
-
-                using var gfx = XGraphics.FromPdfPage(pdfPage);
-                pageRenderer.Render(gfx, pageDefinition, template.Settings, i + 1, pageCount);
-            }
-
-            document.Save(outputStream);
+            RenderTemplate(template, outputStream);
         }
         catch (PdfGenerationException)
         {
@@ -72,6 +54,45 @@ public class PdfGenerator
         {
             throw new PdfGenerationException($"Failed to generate PDF: {ex.Message}", ex);
         }
+    }
+
+    /// <summary>
+    /// Generates a PDF from a PdfTemplate model and returns it as a byte array.
+    /// Use this with the fluent builder API.
+    /// </summary>
+    public byte[] Generate(PdfTemplate template)
+    {
+        using var stream = new MemoryStream();
+        GenerateToStream(template, stream);
+        return stream.ToArray();
+    }
+
+    /// <summary>
+    /// Generates a PDF from a PdfTemplate model and writes it to a stream.
+    /// </summary>
+    public void GenerateToStream(PdfTemplate template, Stream outputStream)
+    {
+        try
+        {
+            RenderTemplate(template, outputStream);
+        }
+        catch (PdfGenerationException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is not PdfGenerationException)
+        {
+            throw new PdfGenerationException($"Failed to generate PDF: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Generates a PDF from a PdfTemplate model and saves it to a file.
+    /// </summary>
+    public void GenerateToFile(PdfTemplate template, string outputPath)
+    {
+        var bytes = Generate(template);
+        File.WriteAllBytes(outputPath, bytes);
     }
 
     /// <summary>
@@ -89,6 +110,29 @@ public class PdfGenerator
     {
         var bytes = Generate(templateJson, dataJson);
         File.WriteAllBytes(outputPath, bytes);
+    }
+
+    private void RenderTemplate(PdfTemplate template, Stream outputStream)
+    {
+        using var document = CreatePdfDocument(template);
+        var styleResolver = new StyleResolver(template.Styles);
+        var pageRenderer = new PageRenderer(styleResolver);
+
+        int pageCount = template.Pages.Count;
+
+        for (int i = 0; i < template.Pages.Count; i++)
+        {
+            var pageDefinition = template.Pages[i];
+            var settings = pageDefinition.Settings ?? template.Settings;
+
+            var pdfPage = document.AddPage();
+            ConfigurePage(pdfPage, settings);
+
+            using var gfx = XGraphics.FromPdfPage(pdfPage);
+            pageRenderer.Render(gfx, pageDefinition, template.Settings, i + 1, pageCount);
+        }
+
+        document.Save(outputStream);
     }
 
     private static PdfDocument CreatePdfDocument(PdfTemplate template)
