@@ -9,7 +9,7 @@ public class LineRenderer
     public double Render(XGraphics gfx, LineElement element, double x, double y, double availableWidth)
     {
         var color = ColorParser.Parse(element.Color, XColors.Black);
-        var strokeWidth = UnitConverter.ToPoints(element.StrokeWidth, 1.0);
+        var strokeWidth = UnitConverter.ToPoints(element.StrokeWidth, PdfDefaults.DefaultStrokeWidth);
         var pen = new XPen(color, strokeWidth);
 
         // Parse dash pattern if specified (e.g., "2,2" or "4,2,1,2")

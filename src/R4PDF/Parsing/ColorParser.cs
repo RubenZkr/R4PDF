@@ -10,21 +10,21 @@ public static class ColorParser
 {
     private static readonly Dictionary<string, XColor> NamedColors = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["black"] = XColors.Black,
-        ["white"] = XColors.White,
-        ["red"] = XColors.Red,
-        ["green"] = XColors.Green,
-        ["blue"] = XColors.Blue,
-        ["gray"] = XColors.Gray,
-        ["grey"] = XColors.Gray,
-        ["yellow"] = XColors.Yellow,
-        ["orange"] = XColors.Orange,
-        ["purple"] = XColors.Purple,
-        ["darkgray"] = XColors.DarkGray,
-        ["darkgrey"] = XColors.DarkGray,
-        ["lightgray"] = XColors.LightGray,
-        ["lightgrey"] = XColors.LightGray,
-        ["transparent"] = XColor.FromArgb(0, 0, 0, 0),
+        [Colors.Black] = XColors.Black,
+        [Colors.White] = XColors.White,
+        [Colors.Red] = XColors.Red,
+        [Colors.Green] = XColors.Green,
+        [Colors.Blue] = XColors.Blue,
+        [Colors.Gray] = XColors.Gray,
+        [Colors.Grey] = XColors.Gray,
+        [Colors.Yellow] = XColors.Yellow,
+        [Colors.Orange] = XColors.Orange,
+        [Colors.Purple] = XColors.Purple,
+        [Colors.DarkGray] = XColors.DarkGray,
+        [Colors.DarkGrey] = XColors.DarkGray,
+        [Colors.LightGray] = XColors.LightGray,
+        [Colors.LightGrey] = XColors.LightGray,
+        [Colors.Transparent] = XColor.FromArgb(0, 0, 0, 0),
     };
 
     public static XColor Parse(string? color)

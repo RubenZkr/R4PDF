@@ -2,15 +2,15 @@ namespace R4PDF.Models;
 
 public class PageSettings
 {
-    public string PageSize { get; set; } = "A4";
-    public string Orientation { get; set; } = "Portrait";
+    public string PageSize { get; set; } = PdfDefaults.PageSize;
+    public string Orientation { get; set; } = PdfDefaults.Orientation;
     public MarginSettings Margins { get; set; } = new();
 }
 
 public class MarginSettings
 {
-    public string Top { get; set; } = "20mm";
-    public string Bottom { get; set; } = "20mm";
-    public string Left { get; set; } = "15mm";
-    public string Right { get; set; } = "15mm";
+    public string Top { get; set; } = PdfDefaults.MarginTop;
+    public string Bottom { get; set; } = PdfDefaults.MarginBottom;
+    public string Left { get; set; } = PdfDefaults.MarginLeft;
+    public string Right { get; set; } = PdfDefaults.MarginRight;
 }

@@ -3,12 +3,12 @@ using System.Text.Json.Serialization;
 namespace R4PDF.Models.Elements;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(TextElement), "text")]
-[JsonDerivedType(typeof(ParagraphElement), "paragraph")]
-[JsonDerivedType(typeof(TableElement), "table")]
-[JsonDerivedType(typeof(ImageElement), "image")]
-[JsonDerivedType(typeof(LineElement), "line")]
-[JsonDerivedType(typeof(RectangleElement), "rectangle")]
+[JsonDerivedType(typeof(TextElement), ElementTypes.Text)]
+[JsonDerivedType(typeof(ParagraphElement), ElementTypes.Paragraph)]
+[JsonDerivedType(typeof(TableElement), ElementTypes.Table)]
+[JsonDerivedType(typeof(ImageElement), ElementTypes.Image)]
+[JsonDerivedType(typeof(LineElement), ElementTypes.Line)]
+[JsonDerivedType(typeof(RectangleElement), ElementTypes.Rectangle)]
 public abstract class PdfElement
 {
     public string? Style { get; set; }
