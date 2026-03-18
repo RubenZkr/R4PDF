@@ -1,42 +1,43 @@
-using R4PDF.Fluent.Builders;
 using R4PDF.Fluent.Themes;
 using R4PDF.Models;
 
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Top-level fluent builder for constructing a PDF document.
-/// Use <see cref="Pdf.Create"/> to get an instance.
+///     Top-level fluent builder for constructing a PDF document.
+///     Use <see cref="Pdf.Create" /> to get an instance.
 /// </summary>
 /// <example>
-/// Pdf.Create()
+///     Pdf.Create()
 ///     .WithTheme(PdfTheme.Default)
 ///     .WithMetadata(m => m.Title("My Report").Author("Team"))
 ///     .AddPage(page => page
-///         .Header(h => h.Text("Report Header"))
-///         .Body(b => b
-///             .Heading1("Introduction")
-///             .Paragraph("This is the content...")
-///             .Table(t => t
-///                 .Column("Name", "50%")
-///                 .Column("Value", "50%")
-///                 .Row("Item 1", "100")
-///                 .Row("Item 2", "200")))
-///         .Footer(f => f.Text("Page {pageNumber} of {pageCount}")))
+///     .Header(h => h.Text("Report Header"))
+///     .Body(b => b
+///     .Heading1("Introduction")
+///     .Paragraph("This is the content...")
+///     .Table(t => t
+///     .Column("Name", "50%")
+///     .Column("Value", "50%")
+///     .Row("Item 1", "100")
+///     .Row("Item 2", "200")))
+///     .Footer(f => f.Text("Page {pageNumber} of {pageCount}")))
 ///     .GenerateToFile("report.pdf");
 /// </example>
 public class PdfDocumentBuilder
 {
-    private PdfTheme? _theme;
-    private DocumentMetadata? _metadata;
-    private PageSettings? _settings;
     private readonly Dictionary<string, PdfStyle> _customStyles = new();
     private readonly List<PageDefinition> _pages = new();
+    private DocumentMetadata? _metadata;
+    private PageSettings? _settings;
+    private PdfTheme? _theme;
 
-    internal PdfDocumentBuilder() { }
+    internal PdfDocumentBuilder()
+    {
+    }
 
     /// <summary>
-    /// Sets the visual theme for the document. All components will use this theme's defaults.
+    ///     Sets the visual theme for the document. All components will use this theme's defaults.
     /// </summary>
     public PdfDocumentBuilder WithTheme(PdfTheme theme)
     {
@@ -45,7 +46,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Configures document metadata (title, author, subject, keywords).
+    ///     Configures document metadata (title, author, subject, keywords).
     /// </summary>
     public PdfDocumentBuilder WithMetadata(Action<MetadataBuilder> configure)
     {
@@ -56,7 +57,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Overrides page settings for the entire document. Takes priority over theme page settings.
+    ///     Overrides page settings for the entire document. Takes priority over theme page settings.
     /// </summary>
     public PdfDocumentBuilder WithSettings(Action<SettingsBuilder> configure)
     {
@@ -67,7 +68,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Adds a custom named style. These are merged with theme styles (custom styles take priority).
+    ///     Adds a custom named style. These are merged with theme styles (custom styles take priority).
     /// </summary>
     public PdfDocumentBuilder AddStyle(string name, PdfStyle style)
     {
@@ -76,7 +77,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Adds a page to the document.
+    ///     Adds a page to the document.
     /// </summary>
     public PdfDocumentBuilder AddPage(Action<PageBuilder> configure)
     {
@@ -87,7 +88,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Builds the PdfTemplate model. Use this to inspect the template or pass to PdfGenerator directly.
+    ///     Builds the PdfTemplate model. Use this to inspect the template or pass to PdfGenerator directly.
     /// </summary>
     public PdfTemplate Build()
     {
@@ -109,7 +110,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Builds the template and generates a PDF as a byte array.
+    ///     Builds the template and generates a PDF as a byte array.
     /// </summary>
     public byte[] Generate()
     {
@@ -119,7 +120,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Builds the template and writes the PDF to a stream.
+    ///     Builds the template and writes the PDF to a stream.
     /// </summary>
     public void GenerateToStream(Stream outputStream)
     {
@@ -129,7 +130,7 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
-    /// Builds the template and saves the PDF to a file.
+    ///     Builds the template and saves the PDF to a file.
     /// </summary>
     public void GenerateToFile(string outputPath)
     {

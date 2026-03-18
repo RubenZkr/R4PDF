@@ -4,14 +4,14 @@ using R4PDF.Models;
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Builder for a single PDF page. Supports header, body, and footer sections.
+///     Builder for a single PDF page. Supports header, body, and footer sections.
 /// </summary>
 public class PageBuilder
 {
     private readonly PdfTheme? _theme;
-    private SectionDefinition? _header;
     private SectionDefinition _body = new();
     private SectionDefinition? _footer;
+    private SectionDefinition? _header;
     private PageSettings? _settings;
 
     internal PageBuilder(PdfTheme? theme)
@@ -20,7 +20,7 @@ public class PageBuilder
     }
 
     /// <summary>
-    /// Defines the header section. Theme header defaults (height, text style) are applied automatically.
+    ///     Defines the header section. Theme header defaults (height, text style) are applied automatically.
     /// </summary>
     public PageBuilder Header(Action<SectionBuilder> configure)
     {
@@ -38,7 +38,7 @@ public class PageBuilder
     }
 
     /// <summary>
-    /// Defines the body section (required — this is where main content goes).
+    ///     Defines the body section (required — this is where main content goes).
     /// </summary>
     public PageBuilder Body(Action<SectionBuilder> configure)
     {
@@ -49,7 +49,7 @@ public class PageBuilder
     }
 
     /// <summary>
-    /// Defines the footer section. Theme footer defaults (height, text style) are applied automatically.
+    ///     Defines the footer section. Theme footer defaults (height, text style) are applied automatically.
     /// </summary>
     public PageBuilder Footer(Action<SectionBuilder> configure)
     {
@@ -67,7 +67,7 @@ public class PageBuilder
     }
 
     /// <summary>
-    /// Overrides page settings for this specific page.
+    ///     Overrides page settings for this specific page.
     /// </summary>
     public PageBuilder Settings(Action<SettingsBuilder> configure)
     {
@@ -77,11 +77,14 @@ public class PageBuilder
         return this;
     }
 
-    internal PageDefinition Build() => new()
+    internal PageDefinition Build()
     {
-        Settings = _settings,
-        Header = _header,
-        Body = _body,
-        Footer = _footer
-    };
+        return new PageDefinition
+        {
+            Settings = _settings,
+            Header = _header,
+            Body = _body,
+            Footer = _footer
+        };
+    }
 }

@@ -4,7 +4,7 @@ using R4PDF.Models.Elements;
 namespace R4PDF.Rendering;
 
 /// <summary>
-/// Merges named styles from the template's styles dictionary with inline element styles.
+///     Merges named styles from the template's styles dictionary with inline element styles.
 /// </summary>
 public class StyleResolver
 {
@@ -12,7 +12,7 @@ public class StyleResolver
 
     public StyleResolver(Dictionary<string, PdfStyle> styles)
     {
-        _styles = styles ?? new();
+        _styles = styles ?? new Dictionary<string, PdfStyle>();
     }
 
     public ResolvedStyle Resolve(PdfElement element)
@@ -21,15 +21,10 @@ public class StyleResolver
 
         // Apply named style first (base layer)
         if (!string.IsNullOrEmpty(element.Style) && _styles.TryGetValue(element.Style, out var namedStyle))
-        {
             ApplyStyle(resolved, namedStyle);
-        }
 
         // Apply inline style (overrides named)
-        if (element.InlineStyle != null)
-        {
-            ApplyStyle(resolved, element.InlineStyle);
-        }
+        if (element.InlineStyle != null) ApplyStyle(resolved, element.InlineStyle);
 
         // Apply direct element properties (highest priority) for text/paragraph elements
         ApplyElementProperties(resolved, element);

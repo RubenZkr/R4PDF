@@ -15,7 +15,7 @@ public class UnitConverterTests
     public void ToPoints_ValidMeasurements_ReturnsCorrectPoints(string input, double expected)
     {
         var result = UnitConverter.ToPoints(input);
-        Assert.Equal(expected, result, precision: 2);
+        Assert.Equal(expected, result, 2);
     }
 
     [Fact]

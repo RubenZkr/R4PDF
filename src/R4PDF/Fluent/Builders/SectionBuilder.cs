@@ -1,19 +1,20 @@
 using R4PDF.Fluent.Options;
 using R4PDF.Fluent.Themes;
+using R4PDF.Models;
 using R4PDF.Models.Elements;
 
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Builder for a content section (header, body, or footer).
-/// Provides convenience methods for adding elements with automatic theme styling.
+///     Builder for a content section (header, body, or footer).
+///     Provides convenience methods for adding elements with automatic theme styling.
 /// </summary>
 public class SectionBuilder
 {
-    private readonly PdfTheme? _theme;
     private readonly List<PdfElement> _elements = new();
-    private string? _height;
+    private readonly PdfTheme? _theme;
     private string? _background;
+    private string? _height;
 
     internal SectionBuilder(PdfTheme? theme)
     {
@@ -235,10 +236,13 @@ public class SectionBuilder
 
     // ── Build ────────────────────────────────────────────────────────────
 
-    internal Models.SectionDefinition Build() => new()
+    internal SectionDefinition Build()
     {
-        Height = _height,
-        Background = _background,
-        Elements = _elements
-    };
+        return new SectionDefinition
+        {
+            Height = _height,
+            Background = _background,
+            Elements = _elements
+        };
+    }
 }

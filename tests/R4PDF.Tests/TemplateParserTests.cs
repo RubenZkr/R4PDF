@@ -1,4 +1,5 @@
 using System.Text.Json;
+using R4PDF.Models.Elements;
 using R4PDF.Parsing;
 
 namespace R4PDF.Tests;
@@ -9,17 +10,17 @@ public class TemplateParserTests
     public void Parse_ValidTemplate_ReturnsPdfTemplate()
     {
         var json = """
-        {
-            "settings": { "pageSize": "A4", "orientation": "Portrait" },
-            "pages": [{
-                "body": {
-                    "elements": [
-                        { "type": "text", "text": "Hello World" }
-                    ]
-                }
-            }]
-        }
-        """;
+                   {
+                       "settings": { "pageSize": "A4", "orientation": "Portrait" },
+                       "pages": [{
+                           "body": {
+                               "elements": [
+                                   { "type": "text", "text": "Hello World" }
+                               ]
+                           }
+                       }]
+                   }
+                   """;
 
         var template = TemplateParser.Parse(json);
 
@@ -33,11 +34,11 @@ public class TemplateParserTests
     public void Parse_EmptyPages_ThrowsJsonException()
     {
         var json = """
-        {
-            "settings": { "pageSize": "A4" },
-            "pages": []
-        }
-        """;
+                   {
+                       "settings": { "pageSize": "A4" },
+                       "pages": []
+                   }
+                   """;
 
         Assert.Throws<JsonException>(() => TemplateParser.Parse(json));
     }
@@ -53,19 +54,19 @@ public class TemplateParserTests
     public void Parse_WithStyles_ParsesStylesDictionary()
     {
         var json = """
-        {
-            "styles": {
-                "title": { "fontSize": 20, "fontWeight": "bold", "color": "#003366" }
-            },
-            "pages": [{
-                "body": {
-                    "elements": [
-                        { "type": "text", "text": "Styled", "style": "title" }
-                    ]
-                }
-            }]
-        }
-        """;
+                   {
+                       "styles": {
+                           "title": { "fontSize": 20, "fontWeight": "bold", "color": "#003366" }
+                       },
+                       "pages": [{
+                           "body": {
+                               "elements": [
+                                   { "type": "text", "text": "Styled", "style": "title" }
+                               ]
+                           }
+                       }]
+                   }
+                   """;
 
         var template = TemplateParser.Parse(json);
 
@@ -78,20 +79,20 @@ public class TemplateParserTests
     public void Parse_WithMetadata_ParsesMetadata()
     {
         var json = """
-        {
-            "metadata": {
-                "title": "My Document",
-                "author": "Test Author"
-            },
-            "pages": [{
-                "body": {
-                    "elements": [
-                        { "type": "text", "text": "Test" }
-                    ]
-                }
-            }]
-        }
-        """;
+                   {
+                       "metadata": {
+                           "title": "My Document",
+                           "author": "Test Author"
+                       },
+                       "pages": [{
+                           "body": {
+                               "elements": [
+                                   { "type": "text", "text": "Test" }
+                               ]
+                           }
+                       }]
+                   }
+                   """;
 
         var template = TemplateParser.Parse(json);
 
@@ -104,27 +105,27 @@ public class TemplateParserTests
     public void Parse_MultipleElementTypes_ParsesPolymorphically()
     {
         var json = """
-        {
-            "pages": [{
-                "body": {
-                    "elements": [
-                        { "type": "text", "text": "Hello" },
-                        { "type": "paragraph", "content": "A paragraph." },
-                        { "type": "line" },
-                        { "type": "rectangle", "fillColor": "#EEEEEE", "width": "100mm", "height": "50mm" }
-                    ]
-                }
-            }]
-        }
-        """;
+                   {
+                       "pages": [{
+                           "body": {
+                               "elements": [
+                                   { "type": "text", "text": "Hello" },
+                                   { "type": "paragraph", "content": "A paragraph." },
+                                   { "type": "line" },
+                                   { "type": "rectangle", "fillColor": "#EEEEEE", "width": "100mm", "height": "50mm" }
+                               ]
+                           }
+                       }]
+                   }
+                   """;
 
         var template = TemplateParser.Parse(json);
         var elements = template.Pages[0].Body.Elements;
 
         Assert.Equal(4, elements.Count);
-        Assert.IsType<Models.Elements.TextElement>(elements[0]);
-        Assert.IsType<Models.Elements.ParagraphElement>(elements[1]);
-        Assert.IsType<Models.Elements.LineElement>(elements[2]);
-        Assert.IsType<Models.Elements.RectangleElement>(elements[3]);
+        Assert.IsType<TextElement>(elements[0]);
+        Assert.IsType<ParagraphElement>(elements[1]);
+        Assert.IsType<LineElement>(elements[2]);
+        Assert.IsType<RectangleElement>(elements[3]);
     }
 }

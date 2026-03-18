@@ -3,9 +3,9 @@ using PdfSharpCore.Fonts;
 namespace R4PDF.Rendering;
 
 /// <summary>
-/// Resolves font families to system-installed TTF files.
-/// Maps common font names (Helvetica, Arial, etc.) to Liberation Sans which is
-/// metrically equivalent and available on most Linux distributions.
+///     Resolves font families to system-installed TTF files.
+///     Maps common font names (Helvetica, Arial, etc.) to Liberation Sans which is
+///     metrically equivalent and available on most Linux distributions.
 /// </summary>
 public class SystemFontResolver : IFontResolver
 {
@@ -20,7 +20,7 @@ public class SystemFontResolver : IFontResolver
         [Regular] = "LiberationSans-Regular.ttf",
         [Bold] = "LiberationSans-Bold.ttf",
         [Italic] = "LiberationSans-Italic.ttf",
-        [BoldItalic] = "LiberationSans-BoldItalic.ttf",
+        [BoldItalic] = "LiberationSans-BoldItalic.ttf"
     };
 
     private static readonly string[] SearchPaths =
@@ -30,7 +30,7 @@ public class SystemFontResolver : IFontResolver
         "/usr/share/fonts/TTF",
         "/usr/share/fonts/truetype",
         "/usr/share/fonts",
-        "/usr/local/share/fonts",
+        "/usr/local/share/fonts"
     ];
 
     // Font names that should be mapped to Liberation Sans
@@ -38,7 +38,7 @@ public class SystemFontResolver : IFontResolver
     {
         FontFamilies.Helvetica, FontFamilies.Arial, FontFamilies.LiberationSans,
         FontFamilies.SansSerif, FontFamilies.Verdana, FontFamilies.Tahoma,
-        FontFamilies.SegoeUI, FontFamilies.Calibri,
+        FontFamilies.SegoeUI, FontFamilies.Calibri
     };
 
     public string DefaultFontName => FontFamilies.LiberationSans;
@@ -51,7 +51,7 @@ public class SystemFontResolver : IFontResolver
             (true, true) => BoldItalic,
             (true, false) => Bold,
             (false, true) => Italic,
-            _ => Regular,
+            _ => Regular
         };
 
         return new FontResolverInfo(faceName);
@@ -82,7 +82,7 @@ public class SystemFontResolver : IFontResolver
     }
 
     /// <summary>
-    /// Ensures the font resolver is registered. Safe to call multiple times.
+    ///     Ensures the font resolver is registered. Safe to call multiple times.
     /// </summary>
     internal static void EnsureRegistered()
     {

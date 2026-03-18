@@ -1,8 +1,8 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/R4PDF/R4PDF.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/R4PDF.Tests/R4PDF.Tests.csproj" />
-  </Folder>
+    <Folder Name="/src/">
+        <Project Path="src/R4PDF/R4PDF.csproj"/>
+    </Folder>
+    <Folder Name="/tests/">
+        <Project Path="tests/R4PDF.Tests/R4PDF.Tests.csproj"/>
+    </Folder>
 </Solution>

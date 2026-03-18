@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined page orientations.
+///     Predefined page orientations.
 /// </summary>
 public static class Orientations
 {

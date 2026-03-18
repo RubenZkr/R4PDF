@@ -1,7 +1,7 @@
 namespace R4PDF.Fluent.Options;
 
 /// <summary>
-/// Inline override options for text elements.
+///     Inline override options for text elements.
 /// </summary>
 public class TextOptions
 {

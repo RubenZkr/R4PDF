@@ -1,7 +1,7 @@
 namespace R4PDF.Fluent.Options;
 
 /// <summary>
-/// Inline override options for line elements.
+///     Inline override options for line elements.
 /// </summary>
 public class LineOptions
 {

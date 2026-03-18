@@ -1,7 +1,7 @@
 namespace R4PDF.Fluent.Options;
 
 /// <summary>
-/// Inline override options for rectangle elements.
+///     Inline override options for rectangle elements.
 /// </summary>
 public class RectangleOptions
 {

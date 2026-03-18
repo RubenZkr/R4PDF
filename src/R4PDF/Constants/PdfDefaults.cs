@@ -1,8 +1,8 @@
 namespace R4PDF;
 
 /// <summary>
-/// Default values used throughout the PDF generation pipeline.
-/// These are applied when no explicit value is provided.
+///     Default values used throughout the PDF generation pipeline.
+///     These are applied when no explicit value is provided.
 /// </summary>
 public static class PdfDefaults
 {

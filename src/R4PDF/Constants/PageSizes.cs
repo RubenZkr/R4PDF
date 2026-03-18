@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined page sizes. Use these or pass any string supported by your PDF engine.
+///     Predefined page sizes. Use these or pass any string supported by your PDF engine.
 /// </summary>
 public static class PageSizes
 {

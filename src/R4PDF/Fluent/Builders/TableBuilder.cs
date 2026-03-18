@@ -1,4 +1,3 @@
-using R4PDF.Fluent.Options;
 using R4PDF.Fluent.Themes;
 using R4PDF.Models;
 using R4PDF.Models.Elements;
@@ -6,17 +5,17 @@ using R4PDF.Models.Elements;
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Builder for table elements. Theme table defaults are applied automatically at build time.
+///     Builder for table elements. Theme table defaults are applied automatically at build time.
 /// </summary>
 public class TableBuilder
 {
-    private readonly TableTheme? _tableTheme;
     private readonly List<TableColumn> _columns = new();
     private readonly List<TableRow> _rows = new();
-    private PdfStyle? _headerStyle;
-    private bool? _alternateRowColors;
+    private readonly TableTheme? _tableTheme;
     private string? _alternateColor;
+    private bool? _alternateRowColors;
     private BorderStyle? _borders;
+    private PdfStyle? _headerStyle;
     private bool _showHeader = true;
 
     internal TableBuilder(TableTheme? tableTheme)
@@ -110,7 +109,8 @@ public class TableBuilder
         if (_headerStyle != null)
         {
             element.HeaderStyle ??= new PdfStyle();
-            if (_headerStyle.BackgroundColor != null) element.HeaderStyle.BackgroundColor = _headerStyle.BackgroundColor;
+            if (_headerStyle.BackgroundColor != null)
+                element.HeaderStyle.BackgroundColor = _headerStyle.BackgroundColor;
             if (_headerStyle.Color != null) element.HeaderStyle.Color = _headerStyle.Color;
             if (_headerStyle.FontWeight != null) element.HeaderStyle.FontWeight = _headerStyle.FontWeight;
             if (_headerStyle.FontSize.HasValue) element.HeaderStyle.FontSize = _headerStyle.FontSize;

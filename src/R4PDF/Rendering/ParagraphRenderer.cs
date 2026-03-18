@@ -1,12 +1,13 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
 public class ParagraphRenderer
 {
-    public double Render(XGraphics gfx, ParagraphElement element, ResolvedStyle style, double x, double y, double availableWidth)
+    public double Render(XGraphics gfx, ParagraphElement element, ResolvedStyle style, double x, double y,
+        double availableWidth)
     {
         var font = style.ToXFont();
         var brush = new XSolidBrush(ColorParser.Parse(style.Color, XColors.Black));
@@ -18,7 +19,7 @@ public class ParagraphRenderer
         if (element.Spacing?.Before != null)
             spaceBefore = UnitConverter.ToPoints(element.Spacing.Before);
 
-        double currentY = y + spaceBefore;
+        var currentY = y + spaceBefore;
 
         // Word-wrap the text
         var lines = WrapText(gfx, element.Content, font, width);
@@ -36,7 +37,7 @@ public class ParagraphRenderer
         if (element.Spacing?.After != null)
             spaceAfter = UnitConverter.ToPoints(element.Spacing.After);
 
-        return (currentY - y) + spaceAfter;
+        return currentY - y + spaceAfter;
     }
 
     private static List<string> WrapText(XGraphics gfx, string text, XFont font, double maxWidth)

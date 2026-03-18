@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined measurement unit suffixes.
+///     Predefined measurement unit suffixes.
 /// </summary>
 public static class Units
 {

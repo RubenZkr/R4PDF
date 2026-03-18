@@ -3,7 +3,7 @@ using R4PDF.Models;
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Builder for PDF document metadata (title, author, etc.).
+///     Builder for PDF document metadata (title, author, etc.).
 /// </summary>
 public class MetadataBuilder
 {

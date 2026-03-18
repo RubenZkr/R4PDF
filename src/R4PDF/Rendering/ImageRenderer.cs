@@ -1,6 +1,6 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 

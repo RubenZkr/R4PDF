@@ -3,9 +3,9 @@ using R4PDF.Models;
 namespace R4PDF.Fluent.Themes;
 
 /// <summary>
-/// Defines a complete visual theme for PDF generation.
-/// Themes provide default styles for all component types, which are applied automatically
-/// when using the fluent API. Individual elements can still override theme defaults.
+///     Defines a complete visual theme for PDF generation.
+///     Themes provide default styles for all component types, which are applied automatically
+///     when using the fluent API. Individual elements can still override theme defaults.
 /// </summary>
 public class PdfTheme
 {
@@ -44,8 +44,8 @@ public class PdfTheme
     // ── Style dictionary conversion ──────────────────────────────────────
 
     /// <summary>
-    /// Converts this theme's named styles into a dictionary compatible with PdfTemplate.Styles.
-    /// The StyleResolver uses these keys to apply styles to elements that reference them by name.
+    ///     Converts this theme's named styles into a dictionary compatible with PdfTemplate.Styles.
+    ///     The StyleResolver uses these keys to apply styles to elements that reference them by name.
     /// </summary>
     public Dictionary<string, PdfStyle> ToStylesDictionary()
     {
@@ -64,47 +64,48 @@ public class PdfTheme
     }
 
     /// <summary>Creates a deep clone of this theme.</summary>
-    public PdfTheme Clone() => new()
+    public PdfTheme Clone()
     {
-        PageSettings = new PageSettings
+        return new PdfTheme
         {
-            PageSize = PageSettings.PageSize,
-            Orientation = PageSettings.Orientation,
-            Margins = new MarginSettings
+            PageSettings = new PageSettings
             {
-                Top = PageSettings.Margins.Top,
-                Bottom = PageSettings.Margins.Bottom,
-                Left = PageSettings.Margins.Left,
-                Right = PageSettings.Margins.Right
-            }
-        },
-        Text = SectionTheme.CloneStyle(Text),
-        Heading1 = SectionTheme.CloneStyle(Heading1),
-        Heading2 = SectionTheme.CloneStyle(Heading2),
-        Heading3 = SectionTheme.CloneStyle(Heading3),
-        Accent = SectionTheme.CloneStyle(Accent),
-        Muted = SectionTheme.CloneStyle(Muted),
-        Caption = SectionTheme.CloneStyle(Caption),
-        Paragraph = SectionTheme.CloneStyle(Paragraph),
-        Table = Table.Clone(),
-        Line = Line.Clone(),
-        Header = Header.Clone(),
-        Footer = Footer.Clone()
-    };
+                PageSize = PageSettings.PageSize,
+                Orientation = PageSettings.Orientation,
+                Margins = new MarginSettings
+                {
+                    Top = PageSettings.Margins.Top,
+                    Bottom = PageSettings.Margins.Bottom,
+                    Left = PageSettings.Margins.Left,
+                    Right = PageSettings.Margins.Right
+                }
+            },
+            Text = SectionTheme.CloneStyle(Text),
+            Heading1 = SectionTheme.CloneStyle(Heading1),
+            Heading2 = SectionTheme.CloneStyle(Heading2),
+            Heading3 = SectionTheme.CloneStyle(Heading3),
+            Accent = SectionTheme.CloneStyle(Accent),
+            Muted = SectionTheme.CloneStyle(Muted),
+            Caption = SectionTheme.CloneStyle(Caption),
+            Paragraph = SectionTheme.CloneStyle(Paragraph),
+            Table = Table.Clone(),
+            Line = Line.Clone(),
+            Header = Header.Clone(),
+            Footer = Footer.Clone()
+        };
+    }
 
     private static void AddIfConfigured(Dictionary<string, PdfStyle> styles, string key, PdfStyle style)
     {
         if (style.FontFamily != null || style.FontSize.HasValue || style.FontWeight != null ||
             style.FontStyle != null || style.Color != null || style.BackgroundColor != null ||
             style.Alignment != null || style.LineHeight.HasValue)
-        {
             styles[key] = style;
-        }
     }
 }
 
 /// <summary>
-/// Well-known style names used by the theme system and fluent builders.
+///     Well-known style names used by the theme system and fluent builders.
 /// </summary>
 public static class ThemeStyleNames
 {

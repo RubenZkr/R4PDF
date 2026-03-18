@@ -1,7 +1,7 @@
 namespace R4PDF.Fluent.Options;
 
 /// <summary>
-/// Inline override options for paragraph elements.
+///     Inline override options for paragraph elements.
 /// </summary>
 public class ParagraphOptions
 {

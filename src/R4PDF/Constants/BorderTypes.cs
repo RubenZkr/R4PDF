@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined border type values.
+///     Predefined border type values.
 /// </summary>
 public static class BorderTypes
 {

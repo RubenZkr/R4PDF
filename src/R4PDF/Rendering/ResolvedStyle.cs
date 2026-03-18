@@ -18,7 +18,7 @@ public class ResolvedStyle
         var style = XFontStyle.Regular;
         if (FontWeight?.Equals(FontWeights.Bold, StringComparison.OrdinalIgnoreCase) == true)
             style |= XFontStyle.Bold;
-        if (FontStyle?.Equals(R4PDF.FontStyles.Italic, StringComparison.OrdinalIgnoreCase) == true)
+        if (FontStyle?.Equals(FontStyles.Italic, StringComparison.OrdinalIgnoreCase) == true)
             style |= XFontStyle.Italic;
 
         return new XFont(FontFamily, FontSize, style);
@@ -32,7 +32,7 @@ public class ResolvedStyle
         {
             Alignments.Center => XStringAlignment.Center,
             Alignments.Right => XStringAlignment.Far,
-            _ => XStringAlignment.Near,
+            _ => XStringAlignment.Near
         };
 
         format.LineAlignment = XLineAlignment.Near;

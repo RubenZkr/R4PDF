@@ -3,7 +3,7 @@ using R4PDF.Models;
 namespace R4PDF.Fluent.Builders;
 
 /// <summary>
-/// Builder for page settings (size, orientation, margins).
+///     Builder for page settings (size, orientation, margins).
 /// </summary>
 public class SettingsBuilder
 {

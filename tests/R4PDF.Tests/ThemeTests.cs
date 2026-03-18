@@ -1,6 +1,5 @@
 using R4PDF.Fluent.Themes;
 using R4PDF.Models;
-using Xunit;
 
 namespace R4PDF.Tests;
 

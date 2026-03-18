@@ -3,10 +3,10 @@ using R4PDF.Models;
 namespace R4PDF.Fluent.Themes;
 
 /// <summary>
-/// Builds a custom PdfTheme by starting from a base theme and overriding individual components.
+///     Builds a custom PdfTheme by starting from a base theme and overriding individual components.
 /// </summary>
 /// <example>
-/// var theme = new PdfThemeBuilder(PdfTheme.Default)
+///     var theme = new PdfThemeBuilder(PdfTheme.Default)
 ///     .Heading1(s => s.Color = "#FF0000")
 ///     .TableHeader(t => t.HeaderBackgroundColor = "#222222")
 ///     .Build();
@@ -15,7 +15,9 @@ public class PdfThemeBuilder
 {
     private readonly PdfTheme _theme;
 
-    public PdfThemeBuilder() : this(PdfTheme.Default) { }
+    public PdfThemeBuilder() : this(PdfTheme.Default)
+    {
+    }
 
     public PdfThemeBuilder(PdfTheme baseTheme)
     {
@@ -100,5 +102,8 @@ public class PdfThemeBuilder
         return this;
     }
 
-    public PdfTheme Build() => _theme;
+    public PdfTheme Build()
+    {
+        return _theme;
+    }
 }

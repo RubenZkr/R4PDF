@@ -1,8 +1,8 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined color names that can be used in style color properties.
-/// Hex values (#RGB, #RRGGBB, #AARRGGBB) are also supported.
+///     Predefined color names that can be used in style color properties.
+///     Hex values (#RGB, #RRGGBB, #AARRGGBB) are also supported.
 /// </summary>
 public static class Colors
 {

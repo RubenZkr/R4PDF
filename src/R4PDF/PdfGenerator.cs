@@ -1,14 +1,15 @@
+using PdfSharpCore;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using R4PDF.Exceptions;
 using R4PDF.Models;
 using R4PDF.Parsing;
 using R4PDF.Rendering;
-using PdfSharpCore.Drawing;
-using PdfSharpCore.Pdf;
 
 namespace R4PDF;
 
 /// <summary>
-/// Converts JSON templates into PDF documents.
+///     Converts JSON templates into PDF documents.
 /// </summary>
 public class PdfGenerator
 {
@@ -18,7 +19,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a JSON template and returns it as a byte array.
+    ///     Generates a PDF from a JSON template and returns it as a byte array.
     /// </summary>
     /// <param name="templateJson">JSON string defining the PDF layout and content.</param>
     /// <param name="dataJson">Optional JSON string with data for placeholder binding (${path.to.value}).</param>
@@ -31,7 +32,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a JSON template and writes it to a stream.
+    ///     Generates a PDF from a JSON template and writes it to a stream.
     /// </summary>
     public void GenerateToStream(string templateJson, string? dataJson, Stream outputStream)
     {
@@ -57,8 +58,8 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a PdfTemplate model and returns it as a byte array.
-    /// Use this with the fluent builder API.
+    ///     Generates a PDF from a PdfTemplate model and returns it as a byte array.
+    ///     Use this with the fluent builder API.
     /// </summary>
     public byte[] Generate(PdfTemplate template)
     {
@@ -68,7 +69,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a PdfTemplate model and writes it to a stream.
+    ///     Generates a PDF from a PdfTemplate model and writes it to a stream.
     /// </summary>
     public void GenerateToStream(PdfTemplate template, Stream outputStream)
     {
@@ -87,7 +88,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a PdfTemplate model and saves it to a file.
+    ///     Generates a PDF from a PdfTemplate model and saves it to a file.
     /// </summary>
     public void GenerateToFile(PdfTemplate template, string outputPath)
     {
@@ -96,7 +97,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a JSON template and saves it to a file.
+    ///     Generates a PDF from a JSON template and saves it to a file.
     /// </summary>
     public void GenerateToFile(string templateJson, string outputPath)
     {
@@ -104,7 +105,7 @@ public class PdfGenerator
     }
 
     /// <summary>
-    /// Generates a PDF from a JSON template with data binding and saves it to a file.
+    ///     Generates a PDF from a JSON template with data binding and saves it to a file.
     /// </summary>
     public void GenerateToFile(string templateJson, string? dataJson, string outputPath)
     {
@@ -118,9 +119,9 @@ public class PdfGenerator
         var styleResolver = new StyleResolver(template.Styles);
         var pageRenderer = new PageRenderer(styleResolver);
 
-        int pageCount = template.Pages.Count;
+        var pageCount = template.Pages.Count;
 
-        for (int i = 0; i < template.Pages.Count; i++)
+        for (var i = 0; i < template.Pages.Count; i++)
         {
             var pageDefinition = template.Pages[i];
             var settings = pageDefinition.Settings ?? template.Settings;
@@ -154,19 +155,19 @@ public class PdfGenerator
     {
         page.Size = settings.PageSize?.ToUpperInvariant() switch
         {
-            "A4" => PdfSharpCore.PageSize.A4,
-            "A3" => PdfSharpCore.PageSize.A3,
-            "A5" => PdfSharpCore.PageSize.A5,
-            "LETTER" => PdfSharpCore.PageSize.Letter,
-            "LEGAL" => PdfSharpCore.PageSize.Legal,
-            "TABLOID" => PdfSharpCore.PageSize.Tabloid,
-            _ => PdfSharpCore.PageSize.A4,
+            "A4" => PageSize.A4,
+            "A3" => PageSize.A3,
+            "A5" => PageSize.A5,
+            "LETTER" => PageSize.Letter,
+            "LEGAL" => PageSize.Legal,
+            "TABLOID" => PageSize.Tabloid,
+            _ => PageSize.A4
         };
 
         page.Orientation = settings.Orientation?.ToUpperInvariant() switch
         {
-            "LANDSCAPE" => PdfSharpCore.PageOrientation.Landscape,
-            _ => PdfSharpCore.PageOrientation.Portrait,
+            "LANDSCAPE" => PageOrientation.Landscape,
+            _ => PageOrientation.Portrait
         };
     }
 }

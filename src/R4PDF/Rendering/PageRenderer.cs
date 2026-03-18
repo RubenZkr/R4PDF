@@ -1,23 +1,23 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
 /// <summary>
-/// Renders a single page: sets up the page, renders header/footer, and dispatches body elements
-/// to the appropriate typed renderers.
+///     Renders a single page: sets up the page, renders header/footer, and dispatches body elements
+///     to the appropriate typed renderers.
 /// </summary>
 public class PageRenderer
 {
-    private readonly StyleResolver _styleResolver;
-    private readonly TextRenderer _textRenderer = new();
-    private readonly ParagraphRenderer _paragraphRenderer = new();
-    private readonly TableRenderer _tableRenderer = new();
     private readonly ImageRenderer _imageRenderer = new();
     private readonly LineRenderer _lineRenderer = new();
+    private readonly ParagraphRenderer _paragraphRenderer = new();
     private readonly RectangleRenderer _rectangleRenderer = new();
+    private readonly StyleResolver _styleResolver;
+    private readonly TableRenderer _tableRenderer = new();
+    private readonly TextRenderer _textRenderer = new();
 
     public PageRenderer(StyleResolver styleResolver)
     {
@@ -37,13 +37,11 @@ public class PageRenderer
         var pageHeight = gfx.PageSize.Height;
         var contentWidth = pageWidth - marginLeft - marginRight;
 
-        double currentY = marginTop;
+        var currentY = marginTop;
 
         // Render header
         if (page.Header != null)
-        {
             currentY += RenderSection(gfx, page.Header, marginLeft, currentY, contentWidth, pageNumber, pageCount);
-        }
 
         // Render body elements
         currentY += RenderSection(gfx, page.Body, marginLeft, currentY, contentWidth, pageNumber, pageCount);
@@ -60,7 +58,8 @@ public class PageRenderer
         }
     }
 
-    private double RenderSection(XGraphics gfx, SectionDefinition section, double x, double y, double contentWidth, int pageNumber, int pageCount)
+    private double RenderSection(XGraphics gfx, SectionDefinition section, double x, double y, double contentWidth,
+        int pageNumber, int pageCount)
     {
         double totalHeight = 0;
 
@@ -69,10 +68,7 @@ public class PageRenderer
         {
             var bgColor = ColorParser.Parse(section.Background);
             var sectionHeight = section.Height != null ? UnitConverter.ToPoints(section.Height) : 0;
-            if (sectionHeight > 0)
-            {
-                gfx.DrawRectangle(new XSolidBrush(bgColor), x, y, contentWidth, sectionHeight);
-            }
+            if (sectionHeight > 0) gfx.DrawRectangle(new XSolidBrush(bgColor), x, y, contentWidth, sectionHeight);
         }
 
         foreach (var element in section.Elements)
@@ -84,7 +80,8 @@ public class PageRenderer
         return totalHeight;
     }
 
-    public double RenderElement(XGraphics gfx, PdfElement element, double x, double y, double contentWidth, int pageNumber, int pageCount)
+    public double RenderElement(XGraphics gfx, PdfElement element, double x, double y, double contentWidth,
+        int pageNumber, int pageCount)
     {
         // Resolve position overrides
         var drawX = element.X != null ? UnitConverter.ToPoints(element.X) : x;
@@ -94,7 +91,8 @@ public class PageRenderer
         return element switch
         {
             TextElement text => RenderText(gfx, text, style, drawX, drawY, contentWidth, pageNumber, pageCount),
-            ParagraphElement para => RenderParagraph(gfx, para, style, drawX, drawY, contentWidth, pageNumber, pageCount),
+            ParagraphElement para => RenderParagraph(gfx, para, style, drawX, drawY, contentWidth, pageNumber,
+                pageCount),
             TableElement table => _tableRenderer.Render(gfx, table, style, drawX, drawY, contentWidth),
             ImageElement image => _imageRenderer.Render(gfx, image, drawX, drawY, contentWidth),
             LineElement line => _lineRenderer.Render(gfx, line, drawX, drawY, contentWidth),
@@ -103,7 +101,8 @@ public class PageRenderer
         };
     }
 
-    private double RenderText(XGraphics gfx, TextElement text, ResolvedStyle style, double x, double y, double contentWidth, int pageNumber, int pageCount)
+    private double RenderText(XGraphics gfx, TextElement text, ResolvedStyle style, double x, double y,
+        double contentWidth, int pageNumber, int pageCount)
     {
         // Replace page number placeholders
         var resolvedText = text.Text
@@ -117,7 +116,8 @@ public class PageRenderer
         return height;
     }
 
-    private double RenderParagraph(XGraphics gfx, ParagraphElement para, ResolvedStyle style, double x, double y, double contentWidth, int pageNumber, int pageCount)
+    private double RenderParagraph(XGraphics gfx, ParagraphElement para, ResolvedStyle style, double x, double y,
+        double contentWidth, int pageNumber, int pageCount)
     {
         var resolvedContent = para.Content
             .Replace(Placeholders.PageNumber, pageNumber.ToString())

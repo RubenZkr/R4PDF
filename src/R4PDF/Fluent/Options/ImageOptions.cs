@@ -1,7 +1,7 @@
 namespace R4PDF.Fluent.Options;
 
 /// <summary>
-/// Inline override options for image elements.
+///     Inline override options for image elements.
 /// </summary>
 public class ImageOptions
 {

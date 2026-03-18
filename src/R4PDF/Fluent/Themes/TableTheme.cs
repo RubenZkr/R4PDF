@@ -1,9 +1,7 @@
-using R4PDF.Models;
-
 namespace R4PDF.Fluent.Themes;
 
 /// <summary>
-/// Theme settings for table elements.
+///     Theme settings for table elements.
 /// </summary>
 public class TableTheme
 {
@@ -17,5 +15,8 @@ public class TableTheme
     public string BorderColor { get; set; } = "#DEE2E6";
     public string BorderWidth { get; set; } = "0.5pt";
 
-    public TableTheme Clone() => (TableTheme)MemberwiseClone();
+    public TableTheme Clone()
+    {
+        return (TableTheme)MemberwiseClone();
+    }
 }

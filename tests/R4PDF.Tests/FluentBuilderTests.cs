@@ -2,7 +2,6 @@ using R4PDF.Fluent;
 using R4PDF.Fluent.Themes;
 using R4PDF.Models;
 using R4PDF.Models.Elements;
-using Xunit;
 
 namespace R4PDF.Tests;
 
@@ -543,15 +542,15 @@ public class FluentBuilderTests
         // Page 1
         var p1 = template.Pages[0];
         Assert.NotNull(p1.Header);
-        Assert.Equal(2, p1.Header!.Elements.Count);    // text + line
-        Assert.Equal(6, p1.Body.Elements.Count);        // h1 + para + spacer + table + line + text
+        Assert.Equal(2, p1.Header!.Elements.Count); // text + line
+        Assert.Equal(6, p1.Body.Elements.Count); // h1 + para + spacer + table + line + text
         Assert.NotNull(p1.Footer);
-        Assert.Equal(2, p1.Footer!.Elements.Count);     // line + caption
+        Assert.Equal(2, p1.Footer!.Elements.Count); // line + caption
 
         // Page 2
         var p2 = template.Pages[1];
         Assert.Null(p2.Header);
-        Assert.Equal(2, p2.Body.Elements.Count);         // h1 + para
+        Assert.Equal(2, p2.Body.Elements.Count); // h1 + para
         Assert.Null(p2.Footer);
 
         // Verify theme styles present

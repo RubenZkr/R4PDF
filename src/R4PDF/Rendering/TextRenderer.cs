@@ -1,12 +1,13 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
 public class TextRenderer
 {
-    public double Render(XGraphics gfx, TextElement element, ResolvedStyle style, double x, double y, double availableWidth)
+    public double Render(XGraphics gfx, TextElement element, ResolvedStyle style, double x, double y,
+        double availableWidth)
     {
         var font = style.ToXFont();
         var brush = new XSolidBrush(ColorParser.Parse(style.Color, XColors.Black));

@@ -4,7 +4,7 @@ using PdfSharpCore.Drawing;
 namespace R4PDF.Parsing;
 
 /// <summary>
-/// Parses color strings (#RRGGBB, #RGB, named colors) into XColor values.
+///     Parses color strings (#RRGGBB, #RGB, named colors) into XColor values.
 /// </summary>
 public static class ColorParser
 {
@@ -24,7 +24,7 @@ public static class ColorParser
         [Colors.DarkGrey] = XColors.DarkGray,
         [Colors.LightGray] = XColors.LightGray,
         [Colors.LightGrey] = XColors.LightGray,
-        [Colors.Transparent] = XColor.FromArgb(0, 0, 0, 0),
+        [Colors.Transparent] = XColor.FromArgb(0, 0, 0, 0)
     };
 
     public static XColor Parse(string? color)

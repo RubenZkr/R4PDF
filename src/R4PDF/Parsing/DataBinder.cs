@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace R4PDF.Parsing;
 
 /// <summary>
-/// Resolves ${path.to.value} placeholders in a JSON template string using values from a data JSON object.
+///     Resolves ${path.to.value} placeholders in a JSON template string using values from a data JSON object.
 /// </summary>
 public static partial class DataBinder
 {
@@ -33,16 +33,10 @@ public static partial class DataBinder
         var current = element;
 
         foreach (var segment in segments)
-        {
             if (current.ValueKind == JsonValueKind.Object && current.TryGetProperty(segment, out var next))
-            {
                 current = next;
-            }
             else
-            {
                 return null;
-            }
-        }
 
         return current.ValueKind switch
         {

@@ -1,6 +1,6 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
@@ -9,7 +9,9 @@ public class RectangleRenderer
     public double Render(XGraphics gfx, RectangleElement element, double x, double y, double availableWidth)
     {
         var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : availableWidth;
-        var height = element.Height != null ? UnitConverter.ToPoints(element.Height) : PdfDefaults.DefaultRectangleHeight;
+        var height = element.Height != null
+            ? UnitConverter.ToPoints(element.Height)
+            : PdfDefaults.DefaultRectangleHeight;
 
         var drawX = element.X != null ? UnitConverter.ToPoints(element.X) : x;
         var drawY = element.Y != null ? UnitConverter.ToPoints(element.Y) : y;

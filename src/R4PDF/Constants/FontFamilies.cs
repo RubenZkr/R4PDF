@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined font family names recognized by the system font resolver.
+///     Predefined font family names recognized by the system font resolver.
 /// </summary>
 public static class FontFamilies
 {

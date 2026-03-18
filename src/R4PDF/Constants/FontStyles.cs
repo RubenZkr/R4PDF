@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined font style values.
+///     Predefined font style values.
 /// </summary>
 public static class FontStyles
 {

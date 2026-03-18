@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined font weight values.
+///     Predefined font weight values.
 /// </summary>
 public static class FontWeights
 {

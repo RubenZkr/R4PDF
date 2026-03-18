@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined element type discriminators used in JSON templates.
+///     Predefined element type discriminators used in JSON templates.
 /// </summary>
 public static class ElementTypes
 {

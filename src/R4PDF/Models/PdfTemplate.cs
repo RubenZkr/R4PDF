@@ -1,7 +1,7 @@
 namespace R4PDF.Models;
 
 /// <summary>
-/// Root model for a PDF template. Defines the document structure, pages, and reusable styles.
+///     Root model for a PDF template. Defines the document structure, pages, and reusable styles.
 /// </summary>
 public class PdfTemplate
 {

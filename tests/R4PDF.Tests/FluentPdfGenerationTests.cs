@@ -1,6 +1,5 @@
 using R4PDF.Fluent;
 using R4PDF.Fluent.Themes;
-using Xunit;
 
 namespace R4PDF.Tests;
 
@@ -15,9 +14,14 @@ public class FluentPdfGenerationTests : IDisposable
         Directory.CreateDirectory(_outputDir);
     }
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
 
-    private string OutputPath(string name) => Path.Combine(_outputDir, name);
+    private string OutputPath(string name)
+    {
+        return Path.Combine(_outputDir, name);
+    }
 
     private void AssertValidPdf(string path)
     {
@@ -66,7 +70,8 @@ public class FluentPdfGenerationTests : IDisposable
                     .Heading1("Dark Theme")
                     .Heading2("A Modern Look")
                     .Spacer()
-                    .Paragraph("This document uses the Dark theme. All text colors, headings, and table styles are automatically applied from the theme definition. No manual color specification needed.")
+                    .Paragraph(
+                        "This document uses the Dark theme. All text colors, headings, and table styles are automatically applied from the theme definition. No manual color specification needed.")
                     .Spacer()
                     .AccentText("This is accented text — stands out!")
                     .MutedText("This is muted text — subtle.")
@@ -100,7 +105,8 @@ public class FluentPdfGenerationTests : IDisposable
                     .Heading2("Clean & Minimal")
                     .Heading3("Section Details")
                     .Spacer()
-                    .Paragraph("The Modern theme features wider margins, larger heading sizes, and increased line height for a spacious reading experience. It's ideal for documents that prioritize readability and visual hierarchy.")
+                    .Paragraph(
+                        "The Modern theme features wider margins, larger heading sizes, and increased line height for a spacious reading experience. It's ideal for documents that prioritize readability and visual hierarchy.")
                     .Spacer()
                     .Line()
                     .Spacer()
@@ -127,7 +133,11 @@ public class FluentPdfGenerationTests : IDisposable
         var path = OutputPath("fluent-04-custom-theme.pdf");
 
         var brandTheme = new PdfThemeBuilder(PdfTheme.Default)
-            .Heading1(s => { s.Color = "#8B0000"; s.FontSize = 26; })
+            .Heading1(s =>
+            {
+                s.Color = "#8B0000";
+                s.FontSize = 26;
+            })
             .Heading2(s => { s.Color = "#A52A2A"; })
             .Accent(s => { s.Color = "#FF4500"; })
             .Table(t =>
@@ -146,7 +156,8 @@ public class FluentPdfGenerationTests : IDisposable
                     .Heading1("Custom Brand Theme")
                     .Heading2("Red & Professional")
                     .Spacer()
-                    .Paragraph("This document uses a custom theme built on top of the Default theme. The heading colors, table header, and line colors have been overridden to match a brand palette.")
+                    .Paragraph(
+                        "This document uses a custom theme built on top of the Default theme. The heading colors, table header, and line colors have been overridden to match a brand palette.")
                     .Spacer()
                     .AccentText("Accent text in brand orange!")
                     .Spacer()
@@ -178,12 +189,30 @@ public class FluentPdfGenerationTests : IDisposable
             .AddPage(page => page
                 .Header(h => h
                     .Height("40mm")
-                    .Text("Acme Software Solutions", o => { o.FontSize = 24; o.FontWeight = FontWeights.Bold; o.Color = "#003366"; })
-                    .Text("123 Innovation Drive, Suite 500, San Francisco, CA 94105", o => { o.FontSize = 10; o.Color = "#666666"; })
-                    .Text("(415) 555-0199  |  billing@acmesoftware.com", o => { o.FontSize = 10; o.Color = "#666666"; })
+                    .Text("Acme Software Solutions", o =>
+                    {
+                        o.FontSize = 24;
+                        o.FontWeight = FontWeights.Bold;
+                        o.Color = "#003366";
+                    })
+                    .Text("123 Innovation Drive, Suite 500, San Francisco, CA 94105", o =>
+                    {
+                        o.FontSize = 10;
+                        o.Color = "#666666";
+                    })
+                    .Text("(415) 555-0199  |  billing@acmesoftware.com", o =>
+                    {
+                        o.FontSize = 10;
+                        o.Color = "#666666";
+                    })
                     .Line())
                 .Body(b => b
-                    .Text("INVOICE", o => { o.FontSize = 20; o.FontWeight = FontWeights.Bold; o.Color = "#003366"; })
+                    .Text("INVOICE", o =>
+                    {
+                        o.FontSize = 20;
+                        o.FontWeight = FontWeights.Bold;
+                        o.Color = "#003366";
+                    })
                     .Spacer()
                     .Text("Invoice #: INV-2024-0042")
                     .Text("Date: March 13, 2026")
@@ -209,7 +238,13 @@ public class FluentPdfGenerationTests : IDisposable
                     .Text("Subtotal: $31,500.00", o => o.Alignment = Alignments.Right)
                     .Text("Tax (8%): $2,520.00", o => o.Alignment = Alignments.Right)
                     .Line(o => o.StrokeWidth = "2pt")
-                    .Text("TOTAL DUE: $34,020.00", o => { o.FontSize = 14; o.FontWeight = FontWeights.Bold; o.Color = "#003366"; o.Alignment = Alignments.Right; }))
+                    .Text("TOTAL DUE: $34,020.00", o =>
+                    {
+                        o.FontSize = 14;
+                        o.FontWeight = FontWeights.Bold;
+                        o.Color = "#003366";
+                        o.Alignment = Alignments.Right;
+                    }))
                 .Footer(f => f
                     .Line()
                     .CaptionText("Thank you for your business!")
@@ -233,10 +268,19 @@ public class FluentPdfGenerationTests : IDisposable
             .AddPage(p => p
                 .Body(b => b
                     .Spacer().Spacer().Spacer()
-                    .Rectangle(o => { o.FillColor = "#2C3E50"; o.Width = "170mm"; o.Height = "3mm"; })
+                    .Rectangle(o =>
+                    {
+                        o.FillColor = "#2C3E50";
+                        o.Width = "170mm";
+                        o.Height = "3mm";
+                    })
                     .Spacer()
                     .Heading1("Quarterly Report")
-                    .Text("Q4 2024  |  October - December", o => { o.FontSize = 16; o.Color = "#888888"; })
+                    .Text("Q4 2024  |  October - December", o =>
+                    {
+                        o.FontSize = 16;
+                        o.Color = "#888888";
+                    })
                     .Spacer().Spacer()
                     .MutedText("Prepared by Analytics Team")
                     .MutedText("January 2025")))
@@ -247,7 +291,8 @@ public class FluentPdfGenerationTests : IDisposable
                     .Heading1("1. Revenue Performance")
                     .Line()
                     .Spacer()
-                    .Paragraph("Revenue growth exceeded targets across all business units. Total Q4 revenue reached $12.8M, a 23% increase year-over-year.")
+                    .Paragraph(
+                        "Revenue growth exceeded targets across all business units. Total Q4 revenue reached $12.8M, a 23% increase year-over-year.")
                     .Spacer()
                     .Table(t => t
                         .Column("Revenue Stream", "35%")
@@ -281,7 +326,8 @@ public class FluentPdfGenerationTests : IDisposable
                         .Row("NPS Score", "> 70", "82", "Exceeded", "Up")
                         .Row("Uptime", "99.9%", "99.97%", "Exceeded", "Stable"))
                     .Spacer()
-                    .Paragraph("All tracked KPIs exceeded targets. Customer acquisition cost dropped 18% below target due to improved marketing efficiency."))
+                    .Paragraph(
+                        "All tracked KPIs exceeded targets. Customer acquisition cost dropped 18% below target due to improved marketing efficiency."))
                 .Footer(f => f.CaptionText("Page {pageNumber} of {pageCount}  |  Confidential")))
             .GenerateToFile(path);
 

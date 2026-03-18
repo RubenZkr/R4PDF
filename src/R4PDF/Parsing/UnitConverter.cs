@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace R4PDF.Parsing;
 
 /// <summary>
-/// Converts measurement strings like "20mm", "1in", "72pt", "2cm" to PDF points (1pt = 1/72 inch).
+///     Converts measurement strings like "20mm", "1in", "72pt", "2cm" to PDF points (1pt = 1/72 inch).
 /// </summary>
 public static partial class UnitConverter
 {
@@ -26,7 +26,8 @@ public static partial class UnitConverter
             if (double.TryParse(measurement.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var raw))
                 return raw;
 
-            throw new FormatException($"Invalid measurement format: '{measurement}'. Expected format like '20mm', '1in', '72pt', '2cm'.");
+            throw new FormatException(
+                $"Invalid measurement format: '{measurement}'. Expected format like '20mm', '1in', '72pt', '2cm'.");
         }
 
         var value = double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);

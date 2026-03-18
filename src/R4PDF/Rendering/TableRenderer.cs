@@ -1,7 +1,7 @@
+using PdfSharpCore.Drawing;
 using R4PDF.Models;
 using R4PDF.Models.Elements;
 using R4PDF.Parsing;
-using PdfSharpCore.Drawing;
 
 namespace R4PDF.Rendering;
 
@@ -9,39 +9,34 @@ public class TableRenderer
 {
     private const double DefaultCellPadding = PdfDefaults.TableCellPadding;
 
-    public double Render(XGraphics gfx, TableElement table, ResolvedStyle style, double x, double y, double availableWidth)
+    public double Render(XGraphics gfx, TableElement table, ResolvedStyle style, double x, double y,
+        double availableWidth)
     {
         if (table.Columns.Count == 0)
             return 0;
 
         // Calculate column widths
         var columnWidths = CalculateColumnWidths(table, availableWidth);
-        double currentY = y;
+        var currentY = y;
 
         // Resolve border style
         var borderPen = ResolveBorderPen(table.Borders);
 
         // Render header row
-        if (table.ShowHeader)
-        {
-            currentY += RenderHeaderRow(gfx, table, columnWidths, x, currentY, borderPen);
-        }
+        if (table.ShowHeader) currentY += RenderHeaderRow(gfx, table, columnWidths, x, currentY, borderPen);
 
         // Render data rows
-        for (int i = 0; i < table.Rows.Count; i++)
+        for (var i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
 
             // Alternate row coloring
             XBrush? rowBackground = null;
             if (row.BackgroundColor != null)
-            {
                 rowBackground = new XSolidBrush(ColorParser.Parse(row.BackgroundColor));
-            }
             else if (table.AlternateRowColors && i % 2 == 1)
-            {
-                rowBackground = new XSolidBrush(ColorParser.Parse(table.AlternateColor, XColor.FromArgb(245, 245, 245)));
-            }
+                rowBackground =
+                    new XSolidBrush(ColorParser.Parse(table.AlternateColor, XColor.FromArgb(245, 245, 245)));
 
             currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground);
         }
@@ -53,9 +48,9 @@ public class TableRenderer
     {
         var widths = new double[table.Columns.Count];
         double totalFixed = 0;
-        int autoCount = 0;
+        var autoCount = 0;
 
-        for (int i = 0; i < table.Columns.Count; i++)
+        for (var i = 0; i < table.Columns.Count; i++)
         {
             var colWidth = table.Columns[i].Width;
             if (colWidth != null && colWidth.EndsWith('%'))
@@ -79,17 +74,16 @@ public class TableRenderer
         if (autoCount > 0)
         {
             var remaining = Math.Max(0, availableWidth - totalFixed) / autoCount;
-            for (int i = 0; i < widths.Length; i++)
-            {
+            for (var i = 0; i < widths.Length; i++)
                 if (widths[i] == 0)
                     widths[i] = remaining;
-            }
         }
 
         return widths;
     }
 
-    private double RenderHeaderRow(XGraphics gfx, TableElement table, double[] columnWidths, double x, double y, XPen? borderPen)
+    private double RenderHeaderRow(XGraphics gfx, TableElement table, double[] columnWidths, double x, double y,
+        XPen? borderPen)
     {
         var headerFont = new XFont(FontFamilies.Helvetica, PdfDefaults.TableHeaderFontSize, XFontStyle.Bold);
         var headerBrush = XBrushes.White;
@@ -112,8 +106,8 @@ public class TableRenderer
 
         // Pre-compute wrapped lines for each header cell to determine row height
         var wrappedHeaders = new List<string>[table.Columns.Count];
-        int maxLines = 1;
-        for (int i = 0; i < table.Columns.Count; i++)
+        var maxLines = 1;
+        for (var i = 0; i < table.Columns.Count; i++)
         {
             var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
             wrappedHeaders[i] = WrapText(gfx, table.Columns[i].Name, headerFont, cellWidth);
@@ -122,18 +116,18 @@ public class TableRenderer
         }
 
         var rowHeight = lineHeight * maxLines + DefaultCellPadding * 2;
-        double currentX = x;
+        var currentX = x;
 
         // Draw header background
         gfx.DrawRectangle(new XSolidBrush(headerBgColor), x, y, columnWidths.Sum(), rowHeight);
 
         // Draw header cells with wrapped text
-        for (int i = 0; i < table.Columns.Count; i++)
+        for (var i = 0; i < table.Columns.Count; i++)
         {
             var format = GetCellFormat(table.Columns[i].Alignment);
             var lines = wrappedHeaders[i];
 
-            for (int li = 0; li < lines.Count; li++)
+            for (var li = 0; li < lines.Count; li++)
             {
                 var lineRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding + li * lineHeight,
                     columnWidths[i] - DefaultCellPadding * 2, lineHeight);
@@ -159,9 +153,9 @@ public class TableRenderer
         // Pre-compute wrapped lines for each cell to determine row height
         var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
         var wrappedCells = new List<string>[cellCount];
-        int maxLines = 1;
+        var maxLines = 1;
 
-        for (int i = 0; i < cellCount; i++)
+        for (var i = 0; i < cellCount; i++)
         {
             var cellText = row.Cells[i] ?? "";
             var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
@@ -171,22 +165,19 @@ public class TableRenderer
         }
 
         var rowHeight = lineHeight * maxLines + DefaultCellPadding * 2;
-        double currentX = x;
+        var currentX = x;
 
         // Draw row background
-        if (rowBackground != null)
-        {
-            gfx.DrawRectangle(rowBackground, x, y, columnWidths.Sum(), rowHeight);
-        }
+        if (rowBackground != null) gfx.DrawRectangle(rowBackground, x, y, columnWidths.Sum(), rowHeight);
 
         // Draw cells with wrapped text
-        for (int i = 0; i < cellCount; i++)
+        for (var i = 0; i < cellCount; i++)
         {
             var alignment = i < table.Columns.Count ? table.Columns[i].Alignment : null;
             var format = GetCellFormat(alignment);
             var lines = wrappedCells[i];
 
-            for (int li = 0; li < lines.Count; li++)
+            for (var li = 0; li < lines.Count; li++)
             {
                 var lineRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding + li * lineHeight,
                     columnWidths[i] - DefaultCellPadding * 2, lineHeight);
@@ -219,7 +210,7 @@ public class TableRenderer
         {
             Alignments.Center => XStringAlignment.Center,
             Alignments.Right => XStringAlignment.Far,
-            _ => XStringAlignment.Near,
+            _ => XStringAlignment.Near
         };
         return format;
     }

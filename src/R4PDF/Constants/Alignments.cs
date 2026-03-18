@@ -1,7 +1,7 @@
 namespace R4PDF;
 
 /// <summary>
-/// Predefined text alignment values.
+///     Predefined text alignment values.
 /// </summary>
 public static class Alignments
 {
