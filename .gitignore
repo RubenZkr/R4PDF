@@ -39,3 +39,21 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+tests/R4PDF.Tests/generated-pdfs/
+tests/R4PDF.Tests/generated-pdfs/01-hello-world.pdf
+tests/R4PDF.Tests/generated-pdfs/02-styled-document.pdf
+tests/R4PDF.Tests/generated-pdfs/03-invoice.pdf
+tests/R4PDF.Tests/generated-pdfs/04-quarterly-report.pdf
+tests/R4PDF.Tests/generated-pdfs/05-tables-showcase.pdf
+tests/R4PDF.Tests/generated-pdfs/06-shapes-and-lines.pdf
+tests/R4PDF.Tests/generated-pdfs/07-offer-letter.pdf
+tests/R4PDF.Tests/generated-pdfs/08-landscape-dashboard.pdf
+tests/R4PDF.Tests/generated-pdfs/09-paragraph-wrapping.pdf
+tests/R4PDF.Tests/generated-pdfs/10-all-elements.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-01-hello-world.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-02-dark-theme.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-03-modern-theme.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-04-custom-theme.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-05-invoice.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-06-multipage-report.pdf
+tests/R4PDF.Tests/generated-pdfs/fluent-09-no-theme.pdf
