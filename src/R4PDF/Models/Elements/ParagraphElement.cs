@@ -11,10 +11,3 @@ public class ParagraphElement : PdfElement
     public double? LineHeight { get; set; }
     public SpacingSettings? Spacing { get; set; }
 }
-
-public class SpacingSettings
-{
-    public string? Before { get; set; }
-    public string? After { get; set; }
-    public double? LineHeight { get; set; }
-}
