@@ -1,5 +1,14 @@
 # Release Notes
 
+## 1.1.1 - 2026-04-08
+
+### Highlights
+- Merge-fix release after integrating `develop` into `feature/autopager`.
+- Preserved auto-pagination improvements and renderer updates during conflict resolution.
+
+### Notes
+- No intentional breaking API changes compared to 1.1.0.
+
 ## 1.1.0 - 2026-04-08
 
 ### Highlights
