@@ -17,7 +17,7 @@ public class ImageRenderer
             if (commaIndex < 0)
                 throw new FormatException("Invalid base64 data URI for image.");
 
-            var base64 = element.Source[(commaIndex + 1)..];
+            var base64 = element.Source[(commaIndex + 1)..].Replace(" ", "").Replace("\n", "").Replace("\r", "").Replace("\t", "");
             var bytes = Convert.FromBase64String(base64);
             using var ms = new MemoryStream(bytes);
             image = XImage.FromStream(() => new MemoryStream(bytes));
