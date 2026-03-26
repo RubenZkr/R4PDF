@@ -30,8 +30,8 @@ public class TableRenderer
             return new SplitRenderResult { HeightUsed = 0, RenderedPart = CloneTable(table), Remainder = null };
 
         var columnWidths = CalculateColumnWidths(table, availableWidth);
-        var borderPen = ResolveBorderPen(table.Borders);
         var currentY = y;
+        var borderPen = ResolveBorderPen(table.Borders, table.NoBorders);
         var heightUsed = 0d;
         var renderedRows = new List<TableRow>();
         var remainderRows = new List<TableRow>();
@@ -42,7 +42,7 @@ public class TableRenderer
 
         if (!allowSplit)
         {
-            var fullHeight = headerHeight + MeasureRowsHeight(gfx, table, columnWidths, 0, table.Rows.Count);
+            var fullHeight = headerHeight + MeasureRowsHeight(gfx, table, columnWidths, 0, table.Rows.Count, style);
             if (fullHeight > availableHeight)
                 return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = CloneTable(table) };
         }
@@ -56,7 +56,7 @@ public class TableRenderer
         for (var i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
-            var rowHeight = MeasureDataRowHeight(gfx, table, row, columnWidths);
+            var rowHeight = MeasureDataRowHeight(gfx, table, row, columnWidths, style);
             var remainingHeight = availableHeight - heightUsed;
 
             if (rowHeight > remainingHeight)
@@ -74,7 +74,7 @@ public class TableRenderer
                 rowBackground =
                     new XSolidBrush(ColorParser.Parse(table.AlternateColor, XColor.FromArgb(245, 245, 245)));
 
-            currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground);
+            currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground, style);
             heightUsed += rowHeight;
             renderedRows.Add(CloneRow(row));
         }
@@ -159,17 +159,21 @@ public class TableRenderer
         return lineHeight * maxLines + DefaultCellPadding * 2;
     }
 
-    private double MeasureRowsHeight(XGraphics gfx, TableElement table, double[] columnWidths, int start, int count)
+    private double MeasureRowsHeight(XGraphics gfx, TableElement table, double[] columnWidths, int start, int count,
+        ResolvedStyle style)
     {
         var total = 0d;
         for (var i = start; i < start + count; i++)
-            total += MeasureDataRowHeight(gfx, table, table.Rows[i], columnWidths);
+            total += MeasureDataRowHeight(gfx, table, table.Rows[i], columnWidths, style);
         return total;
     }
 
-    private double MeasureDataRowHeight(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths)
+    private double MeasureDataRowHeight(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
+        ResolvedStyle? style = null)
     {
-        var font = new XFont(FontFamilies.Helvetica, PdfDefaults.TableDataFontSize);
+        var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
+        var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
+        var font = new XFont(fontFamily, PdfDefaults.TableDataFontSize, fontStyle);
         var lineHeight = font.Height;
         var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
         var maxLines = 1;
@@ -245,9 +249,11 @@ public class TableRenderer
     }
 
     private double RenderDataRow(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
-        double x, double y, XPen? borderPen, XBrush? rowBackground)
+        double x, double y, XPen? borderPen, XBrush? rowBackground, ResolvedStyle? style = null)
     {
-        var font = new XFont(FontFamilies.Helvetica, PdfDefaults.TableDataFontSize);
+        var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
+        var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
+        var font = new XFont(fontFamily, PdfDefaults.TableDataFontSize, fontStyle);
         var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
         var lineHeight = font.Height;
 
@@ -292,8 +298,11 @@ public class TableRenderer
         return rowHeight;
     }
 
-    private static XPen? ResolveBorderPen(BorderStyle? borders)
+    private static XPen? ResolveBorderPen(BorderStyle? borders, bool noBorders = false)
     {
+        if (noBorders)
+            return null;
+
         if (borders == null)
             return new XPen(XColors.LightGray, PdfDefaults.BorderWidth);
 
@@ -364,6 +373,7 @@ public class TableRenderer
             ShowHeader = source.ShowHeader,
             AlternateRowColors = source.AlternateRowColors,
             AlternateColor = source.AlternateColor,
+            NoBorders = source.NoBorders,
             HeaderStyle = source.HeaderStyle == null
                 ? null
                 : new PdfStyle
@@ -401,7 +411,8 @@ public class TableRenderer
         {
             Cells = source.Cells.ToList(),
             BackgroundColor = source.BackgroundColor,
-            TextColor = source.TextColor
+            TextColor = source.TextColor,
+            IsBold = source.IsBold
         };
     }
 }

@@ -9,4 +9,5 @@ public class TableElement : PdfElement
     public bool AlternateRowColors { get; set; }
     public string? AlternateColor { get; set; }
     public BorderStyle? Borders { get; set; }
+    public bool NoBorders { get; set; }
 }

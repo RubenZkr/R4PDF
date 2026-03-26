@@ -17,6 +17,7 @@ public class TableBuilder
     private BorderStyle? _borders;
     private PdfStyle? _headerStyle;
     private bool _showHeader = true;
+    private bool _noBorders;
 
     internal TableBuilder(TableTheme? tableTheme)
     {
@@ -37,6 +38,19 @@ public class TableBuilder
     public TableBuilder Row(params string[] cells)
     {
         _rows.Add(new TableRow { Cells = cells.ToList() });
+        return this;
+    }
+
+    public TableBuilder BoldRow(params string[] cells)
+    {
+        _rows.Add(new TableRow { Cells = cells.ToList(), IsBold = true });
+        return this;
+    }
+
+    public TableBuilder NoBorders()
+    {
+        _noBorders = true;
+        _alternateRowColors = false;
         return this;
     }
 
@@ -119,6 +133,7 @@ public class TableBuilder
         if (_alternateRowColors.HasValue) element.AlternateRowColors = _alternateRowColors.Value;
         if (_alternateColor != null) element.AlternateColor = _alternateColor;
         if (_borders != null) element.Borders = _borders;
+        if (_noBorders) element.NoBorders = true;
 
         return element;
     }
