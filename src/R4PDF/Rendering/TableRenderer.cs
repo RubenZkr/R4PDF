@@ -20,7 +20,7 @@ public class TableRenderer
         var currentY = y;
 
         // Resolve border style
-        var borderPen = ResolveBorderPen(table.Borders);
+        var borderPen = ResolveBorderPen(table.Borders, table.NoBorders);
 
         // Render header row
         if (table.ShowHeader) currentY += RenderHeaderRow(gfx, table, columnWidths, x, currentY, borderPen);
@@ -38,7 +38,7 @@ public class TableRenderer
                 rowBackground =
                     new XSolidBrush(ColorParser.Parse(table.AlternateColor, XColor.FromArgb(245, 245, 245)));
 
-            currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground);
+            currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground, style);
         }
 
         return currentY - y;
@@ -144,9 +144,11 @@ public class TableRenderer
     }
 
     private double RenderDataRow(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
-        double x, double y, XPen? borderPen, XBrush? rowBackground)
+        double x, double y, XPen? borderPen, XBrush? rowBackground, ResolvedStyle? style = null)
     {
-        var font = new XFont(FontFamilies.Helvetica, PdfDefaults.TableDataFontSize);
+        var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
+        var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
+        var font = new XFont(fontFamily, PdfDefaults.TableDataFontSize, fontStyle);
         var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
         var lineHeight = font.Height;
 
@@ -193,8 +195,11 @@ public class TableRenderer
         return rowHeight;
     }
 
-    private static XPen? ResolveBorderPen(BorderStyle? borders)
+    private static XPen? ResolveBorderPen(BorderStyle? borders, bool noBorders = false)
     {
+        if (noBorders)
+            return null;
+
         if (borders == null)
             return new XPen(XColors.LightGray, PdfDefaults.BorderWidth);
 
