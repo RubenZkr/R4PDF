@@ -1,3 +1,5 @@
+using PdfSharpCore.Pdf.IO;
+
 namespace R4PDF.Tests;
 
 public class PdfGeneratorIntegrationTests
@@ -229,5 +231,75 @@ public class PdfGeneratorIntegrationTests
 
         var pdf = _generator.Generate(template);
         Assert.True(pdf.Length > 0);
+    }
+
+    [Fact]
+    public void Generate_AutoPaginationFromJson_ProducesContinuationPages()
+    {
+        var longText = string.Join(" ", Enumerable.Repeat(
+            "Deze tekst wordt herhaald om voldoende body-content te genereren voor automatische paginering.", 220));
+
+        var template = $$"""
+                         {
+                             "settings": {
+                                 "autoPagination": {
+                                     "enabled": true,
+                                     "repeatHeaderOnContinuation": true,
+                                     "repeatFooterOnContinuation": true,
+                                     "splitParagraphs": true,
+                                     "splitTables": true
+                                 }
+                             },
+                             "pages": [
+                                 {
+                                     "header": {
+                                         "elements": [
+                                             { "type": "text", "text": "Auto-pagination test" }
+                                         ]
+                                     },
+                                     "body": {
+                                         "elements": [
+                                             { "type": "paragraph", "content": "{{longText}}", "fontSize": 12, "lineHeight": 1.6 },
+                                             {
+                                                 "type": "table",
+                                                 "columns": [
+                                                     { "name": "Kolom", "width": "30%" },
+                                                     { "name": "Waarde", "width": "70%" }
+                                                 ],
+                                                 "rows": [
+                                                     { "cells": ["1", "A"] },
+                                                     { "cells": ["2", "B"] },
+                                                     { "cells": ["3", "C"] },
+                                                     { "cells": ["4", "D"] },
+                                                     { "cells": ["5", "E"] },
+                                                     { "cells": ["6", "F"] },
+                                                     { "cells": ["7", "G"] },
+                                                     { "cells": ["8", "H"] },
+                                                     { "cells": ["9", "I"] },
+                                                     { "cells": ["10", "J"] },
+                                                     { "cells": ["11", "K"] },
+                                                     { "cells": ["12", "L"] },
+                                                     { "cells": ["13", "M"] },
+                                                     { "cells": ["14", "N"] },
+                                                     { "cells": ["15", "O"] }
+                                                 ]
+                                             }
+                                         ]
+                                     },
+                                     "footer": {
+                                         "elements": [
+                                             { "type": "text", "text": "Page {pageNumber} of {pageCount}", "alignment": "center" }
+                                         ]
+                                     }
+                                 }
+                             ]
+                         }
+                         """;
+
+        var pdfBytes = _generator.Generate(template);
+
+        using var stream = new MemoryStream(pdfBytes);
+        using var pdf = PdfReader.Open(stream, PdfDocumentOpenMode.ReadOnly);
+        Assert.True(pdf.PageCount > 1, "Expected auto-pagination to create continuation pages.");
     }
 }

@@ -58,6 +58,40 @@ public class FluentBuilderTests
         Assert.Equal("30mm", template.Settings.Margins.Left);
     }
 
+    [Fact]
+    public void WithAutoPagination_EnablesAtDocumentLevel()
+    {
+        var template = Pdf.Create()
+            .WithAutoPagination()
+            .AddPage(p => p.Body(b => b.Text("x")))
+            .Build();
+
+        Assert.True(template.Settings.AutoPagination.Enabled);
+        Assert.True(template.Settings.AutoPagination.RepeatHeaderOnContinuation);
+        Assert.True(template.Settings.AutoPagination.RepeatFooterOnContinuation);
+        Assert.True(template.Settings.AutoPagination.SplitParagraphs);
+        Assert.True(template.Settings.AutoPagination.SplitTables);
+    }
+
+    [Fact]
+    public void WithAutoPagination_ConfigureOverridesDefaults()
+    {
+        var template = Pdf.Create()
+            .WithAutoPagination(a => a
+                .RepeatHeaderOnContinuation(false)
+                .RepeatFooterOnContinuation(false)
+                .SplitParagraphs(false)
+                .SplitTables(false))
+            .AddPage(p => p.Body(b => b.Text("x")))
+            .Build();
+
+        Assert.True(template.Settings.AutoPagination.Enabled);
+        Assert.False(template.Settings.AutoPagination.RepeatHeaderOnContinuation);
+        Assert.False(template.Settings.AutoPagination.RepeatFooterOnContinuation);
+        Assert.False(template.Settings.AutoPagination.SplitParagraphs);
+        Assert.False(template.Settings.AutoPagination.SplitTables);
+    }
+
     // ── Theme integration ────────────────────────────────────────────────
 
     [Fact]

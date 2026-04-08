@@ -1,5 +1,6 @@
 using R4PDF.Fluent;
 using R4PDF.Fluent.Themes;
+using PdfSharpCore.Pdf.IO;
 
 namespace R4PDF.Tests;
 
@@ -383,7 +384,56 @@ public class FluentPdfGenerationTests : IDisposable
         AssertValidPdf(path);
     }
 
-    // ── 10. PdfGenerator.Generate(PdfTemplate) directly ──────────────────
+    [Fact]
+    public void Fluent_AutoPagination_ContinuesOverflowingBody()
+    {
+        var path = OutputPath("fluent-10-auto-pagination.pdf");
+
+        var longText = string.Join(" ", Enumerable.Repeat(
+            "Dit is een lange alinea die bewust veel regels inneemt zodat de body over meerdere pagina's verdeeld wordt.",
+            220));
+
+        Pdf.Create()
+            .WithTheme(PdfTheme.Default)
+            .WithAutoPagination(a => a
+                .Enabled()
+                .RepeatHeaderOnContinuation()
+                .RepeatFooterOnContinuation()
+                .SplitParagraphs()
+                .SplitTables())
+            .AddPage(p => p
+                .Header(h => h.Text("Auto pagination demo"))
+                .Body(b => b
+                    .Heading1("Automatische paginering")
+                    .Paragraph(longText)
+                    .Table(t => t
+                        .Column("Index", "20%")
+                        .Column("Omschrijving", "80%")
+                        .Row("1", "Rij 1")
+                        .Row("2", "Rij 2")
+                        .Row("3", "Rij 3")
+                        .Row("4", "Rij 4")
+                        .Row("5", "Rij 5")
+                        .Row("6", "Rij 6")
+                        .Row("7", "Rij 7")
+                        .Row("8", "Rij 8")
+                        .Row("9", "Rij 9")
+                        .Row("10", "Rij 10")
+                        .Row("11", "Rij 11")
+                        .Row("12", "Rij 12")
+                        .Row("13", "Rij 13")
+                        .Row("14", "Rij 14")
+                        .Row("15", "Rij 15")))
+                .Footer(f => f.CaptionText("Page {pageNumber} of {pageCount}")))
+            .GenerateToFile(path);
+
+        AssertValidPdf(path);
+
+        using var pdf = PdfReader.Open(path, PdfDocumentOpenMode.ReadOnly);
+        Assert.True(pdf.PageCount > 1, "Expected auto-pagination to create continuation pages.");
+    }
+
+    // ── 11. PdfGenerator.Generate(PdfTemplate) directly ──────────────────
 
     [Fact]
     public void PdfGenerator_AcceptsPdfTemplate()
