@@ -1,6 +1,7 @@
 # R4PDF
 
-A free, open-source .NET 8, 9. 10 library that converts JSON templates into fully customizable PDFs. No paid licenses — just define your layout in JSON and generate PDFs.
+A free, open-source .NET 8, 9. 10 library that converts JSON templates into fully customizable PDFs. No paid licenses —
+just define your layout in JSON and generate PDFs.
 
 ## Links
 
@@ -105,7 +106,9 @@ byte[] pdf = generator.Generate(template, data);
 ### Element Types
 
 #### Text
+
 Single-line text with optional styling.
+
 ```json
 {
     "type": "text",
@@ -120,7 +123,9 @@ Single-line text with optional styling.
 ```
 
 #### Paragraph
+
 Multi-line text with automatic word wrapping.
+
 ```json
 {
     "type": "paragraph",
@@ -133,6 +138,7 @@ Multi-line text with automatic word wrapping.
 ```
 
 #### Table
+
 ```json
 {
     "type": "table",
@@ -156,6 +162,7 @@ Multi-line text with automatic word wrapping.
 ```
 
 #### Image
+
 ```json
 {
     "type": "image",
@@ -165,9 +172,11 @@ Multi-line text with automatic word wrapping.
     "maintainAspectRatio": true
 }
 ```
+
 Supports: base64 data URIs, file paths.
 
 #### Line
+
 ```json
 {
     "type": "line",
@@ -178,6 +187,7 @@ Supports: base64 data URIs, file paths.
 ```
 
 #### Rectangle
+
 ```json
 {
     "type": "rectangle",
@@ -216,6 +226,7 @@ Styles are merged in priority order: **named style → inline style → element 
 ### Measurement Units
 
 All size/position values accept these units:
+
 - `mm` — millimeters (e.g., `"20mm"`)
 - `cm` — centimeters (e.g., `"2.5cm"`)
 - `in` — inches (e.g., `"1in"`)
@@ -229,6 +240,7 @@ All size/position values accept these units:
 ### Page Number Placeholders
 
 Use in header/footer text:
+
 - `{pageNumber}` — current page number
 - `{pageCount}` — total page count
 
