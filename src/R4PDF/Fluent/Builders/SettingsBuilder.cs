@@ -22,6 +22,14 @@ public class SettingsBuilder
                     Bottom = baseSettings.Margins.Bottom,
                     Left = baseSettings.Margins.Left,
                     Right = baseSettings.Margins.Right
+                },
+                AutoPagination = new AutoPaginationSettings
+                {
+                    Enabled = baseSettings.AutoPagination.Enabled,
+                    RepeatHeaderOnContinuation = baseSettings.AutoPagination.RepeatHeaderOnContinuation,
+                    RepeatFooterOnContinuation = baseSettings.AutoPagination.RepeatFooterOnContinuation,
+                    SplitParagraphs = baseSettings.AutoPagination.SplitParagraphs,
+                    SplitTables = baseSettings.AutoPagination.SplitTables
                 }
             }
             : new PageSettings();
@@ -60,6 +68,13 @@ public class SettingsBuilder
             Left = all,
             Right = all
         };
+        return this;
+    }
+
+    public SettingsBuilder AutoPagination(Action<AutoPaginationBuilder> configure)
+    {
+        var builder = new AutoPaginationBuilder(Settings.AutoPagination);
+        configure(builder);
         return this;
     }
 }

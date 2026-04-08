@@ -6,6 +6,14 @@ namespace R4PDF.Rendering;
 
 public class TextRenderer
 {
+    public double MeasureHeight(XGraphics gfx, TextElement element, ResolvedStyle style, double availableWidth)
+    {
+        var font = style.ToXFont();
+        var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : availableWidth;
+        var textSize = gfx.MeasureString(element.Text, font);
+        return element.Height != null ? UnitConverter.ToPoints(element.Height) : textSize.Height;
+    }
+
     public double Render(XGraphics gfx, TextElement element, ResolvedStyle style, double x, double y,
         double availableWidth)
     {
@@ -15,8 +23,7 @@ public class TextRenderer
 
         // Calculate layout rect
         var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : availableWidth;
-        var textSize = gfx.MeasureString(element.Text, font);
-        var height = element.Height != null ? UnitConverter.ToPoints(element.Height) : textSize.Height;
+        var height = MeasureHeight(gfx, element, style, availableWidth);
 
         var rect = new XRect(x, y, width, height);
         gfx.DrawString(element.Text, font, brush, rect, format);

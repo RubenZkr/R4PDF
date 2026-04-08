@@ -68,6 +68,28 @@ public class PdfDocumentBuilder
     }
 
     /// <summary>
+    ///     Enables automatic body-content pagination to continuation pages.
+    /// </summary>
+    public PdfDocumentBuilder WithAutoPagination(bool enabled = true)
+    {
+        _settings ??= new SettingsBuilder(_theme?.PageSettings).Settings;
+        _settings.AutoPagination.Enabled = enabled;
+        return this;
+    }
+
+    /// <summary>
+    ///     Enables and configures automatic body-content pagination.
+    /// </summary>
+    public PdfDocumentBuilder WithAutoPagination(Action<AutoPaginationBuilder> configure)
+    {
+        _settings ??= new SettingsBuilder(_theme?.PageSettings).Settings;
+        var builder = new AutoPaginationBuilder(_settings.AutoPagination);
+        builder.Enabled();
+        configure(builder);
+        return this;
+    }
+
+    /// <summary>
     ///     Adds a custom named style. These are merged with theme styles (custom styles take priority).
     /// </summary>
     public PdfDocumentBuilder AddStyle(string name, PdfStyle style)

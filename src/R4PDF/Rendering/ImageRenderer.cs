@@ -6,32 +6,52 @@ namespace R4PDF.Rendering;
 
 public class ImageRenderer
 {
+    public double MeasureHeight(ImageElement element, double availableWidth)
+    {
+        using var image = LoadImage(element);
+        var (_, height) = CalculateDimensions(image, element, availableWidth);
+        return height;
+    }
+
     public double Render(XGraphics gfx, ImageElement element, double x, double y, double availableWidth)
     {
-        XImage image;
+        using var image = LoadImage(element);
+        var (targetWidth, targetHeight) = CalculateDimensions(image, element, availableWidth);
 
+        // Handle alignment
+        var drawX = x;
+        if (element.Alignment?.Equals(Alignments.Center, StringComparison.OrdinalIgnoreCase) == true)
+            drawX = x + (availableWidth - targetWidth) / 2;
+        else if (element.Alignment?.Equals(Alignments.Right, StringComparison.OrdinalIgnoreCase) == true)
+            drawX = x + availableWidth - targetWidth;
+
+        gfx.DrawImage(image, drawX, y, targetWidth, targetHeight);
+
+        return targetHeight;
+    }
+
+    private static XImage LoadImage(ImageElement element)
+    {
         if (element.Source.StartsWith("data:"))
         {
-            // Base64 data URI: data:image/png;base64,iVBOR...
             var commaIndex = element.Source.IndexOf(',');
             if (commaIndex < 0)
                 throw new FormatException("Invalid base64 data URI for image.");
 
             var base64 = element.Source[(commaIndex + 1)..];
             var bytes = Convert.FromBase64String(base64);
-            using var ms = new MemoryStream(bytes);
-            image = XImage.FromStream(() => new MemoryStream(bytes));
-        }
-        else if (File.Exists(element.Source))
-        {
-            image = XImage.FromFile(element.Source);
-        }
-        else
-        {
-            throw new FileNotFoundException($"Image file not found: '{element.Source}'");
+            return XImage.FromStream(() => new MemoryStream(bytes));
         }
 
-        // Calculate dimensions
+        if (File.Exists(element.Source))
+            return XImage.FromFile(element.Source);
+
+        throw new FileNotFoundException($"Image file not found: '{element.Source}'");
+    }
+
+    private static (double Width, double Height) CalculateDimensions(XImage image, ImageElement element,
+        double availableWidth)
+    {
         var targetWidth = element.Width != null ? UnitConverter.ToPoints(element.Width) : 0;
         var targetHeight = element.Height != null ? UnitConverter.ToPoints(element.Height) : 0;
 
@@ -49,15 +69,6 @@ public class ImageRenderer
             targetWidth = image.PointWidth * (targetHeight / image.PointHeight);
         }
 
-        // Handle alignment
-        var drawX = x;
-        if (element.Alignment?.Equals(Alignments.Center, StringComparison.OrdinalIgnoreCase) == true)
-            drawX = x + (availableWidth - targetWidth) / 2;
-        else if (element.Alignment?.Equals(Alignments.Right, StringComparison.OrdinalIgnoreCase) == true)
-            drawX = x + availableWidth - targetWidth;
-
-        gfx.DrawImage(image, drawX, y, targetWidth, targetHeight);
-
-        return targetHeight;
+        return (targetWidth, targetHeight);
     }
 }

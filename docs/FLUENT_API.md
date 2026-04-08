@@ -37,6 +37,7 @@ The fluent API follows this hierarchy:
 Pdf.Create()                    // Start document builder
   ├─ WithTheme()               // Apply a theme (optional)
   ├─ WithMetadata()            // Set document metadata
+    ├─ WithAutoPagination()      // Enable automatic continuation pages (optional)
   ├─ AddPage()                 // Add a page
   │   ├─ Settings()            // Page-specific settings
   │   ├─ Header()              // Page header section
@@ -55,6 +56,8 @@ The root builder for creating PDF documents.
 **Methods:**
 - `WithTheme(PdfTheme)` - Apply a built-in or custom theme
 - `WithMetadata(Action<MetadataBuilder>)` - Configure document metadata
+- `WithAutoPagination(bool)` - Enable or disable automatic continuation pages
+- `WithAutoPagination(Action<AutoPaginationBuilder>)` - Configure automatic pagination behavior
 - `AddPage(Action<PageBuilder>)` - Add a new page
 - `AddStyle(string name, PdfStyle)` - Add a custom named style
 - `Generate()` - Returns `byte[]` - Generate PDF bytes
@@ -69,6 +72,12 @@ var pdf = Pdf.Create()
         .Title("Invoice")
         .Author("Company Name")
     )
+    .WithAutoPagination(a => a
+        .Enabled()
+        .RepeatHeaderOnContinuation()
+        .RepeatFooterOnContinuation()
+        .SplitParagraphs()
+        .SplitTables())
     .AddPage(page => { /* ... */ })
     .AddPage(page => { /* ... */ })
     .GenerateToFile("document.pdf");
@@ -126,6 +135,7 @@ Configure page layout and dimensions.
 - `PageSize(string)` - Set page size (e.g., "A4", "Letter", "A3")
 - `Orientation(string)` - Set orientation ("Portrait" or "Landscape")
 - `Margins(string top, string right, string bottom, string left)` - Set margins
+- `AutoPagination(Action<AutoPaginationBuilder>)` - Configure automatic continuation rules
 
 **Supported Page Sizes:**
 - `A3`, `A4`, `A5`, `A6`
@@ -144,8 +154,23 @@ Configure page layout and dimensions.
     .PageSize("A4")
     .Orientation("Landscape")
     .Margins("25mm", "20mm", "25mm", "20mm")
+    .AutoPagination(a => a
+        .Enabled()
+        .SplitParagraphs()
+        .SplitTables())
 )
 ```
+
+### AutoPaginationBuilder
+
+Configure continuation behavior when body content exceeds page space.
+
+**Methods:**
+- `Enabled(bool enabled = true)` - Turn automatic continuation on or off
+- `RepeatHeaderOnContinuation(bool enabled = true)` - Repeat header on auto-generated pages
+- `RepeatFooterOnContinuation(bool enabled = true)` - Repeat footer on auto-generated pages
+- `SplitParagraphs(bool enabled = true)` - Allow paragraph content to continue across pages
+- `SplitTables(bool enabled = true)` - Allow table rows to continue across pages
 
 ### Section Builder (`SectionBuilder`)
 
