@@ -1,5 +1,6 @@
 using R4PDF.Fluent;
 using R4PDF.Fluent.Themes;
+using R4PDF.Models.Elements;
 using PdfSharpCore.Pdf.IO;
 
 namespace R4PDF.Tests;
@@ -380,6 +381,41 @@ public class FluentPdfGenerationTests : IDisposable
                 .Text("No theme applied")
                 .Text("Using default renderer settings")))
             .GenerateToFile(path);
+
+        AssertValidPdf(path);
+    }
+
+    [Fact]
+    public void Fluent_Table_WithCustomDataFontSize_GeneratesPdf()
+    {
+        var path = OutputPath("fluent-09b-table-custom-data-font-size.pdf");
+
+        var customTheme = new PdfThemeBuilder(PdfTheme.Default)
+            .Table(t =>
+            {
+                t.HeaderFontSize = 8;
+                t.DataFontSize = 7;
+            })
+            .Build();
+
+        var template = Pdf.Create()
+            .WithTheme(customTheme)
+            .WithMetadata(m => m.Title("Table custom data font size"))
+            .AddPage(p => p.Body(b => b
+                .Heading2("Tabel met custom data font size")
+                .Table(t => t
+                    .Column("Kolom", "40%")
+                    .Column("Waarde", "60%")
+                    .Row("Peilmoment", "10-04-2026 15:39:47.002")
+                    .Row("Registratie periode", "23-11-2023")
+                    .Row("Registratie tijdstip", "23-11-2023 14:20:52.812"))))
+            .Build();
+
+        var table = Assert.IsType<TableElement>(template.Pages[0].Body.Elements.Single(e => e is TableElement));
+        Assert.Equal(7d, table.DataFontSize);
+
+        var bytes = new PdfGenerator().Generate(template);
+        File.WriteAllBytes(path, bytes);
 
         AssertValidPdf(path);
     }

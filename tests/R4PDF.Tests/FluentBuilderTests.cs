@@ -385,7 +385,25 @@ public class FluentBuilderTests
         var element = template.Pages[0].Body.Elements[0] as TableElement;
         Assert.Equal("#003366", element!.HeaderStyle?.BackgroundColor);
         Assert.Equal("#FFFFFF", element.HeaderStyle?.Color);
+        Assert.Equal(PdfTheme.Default.Table.DataFontSize, element.DataFontSize);
         Assert.True(element.AlternateRowColors);
+    }
+
+    [Fact]
+    public void SectionBuilder_Table_WithTheme_PropagatesDataFontSize()
+    {
+        var theme = PdfTheme.Default.Clone();
+        theme.Table.DataFontSize = 7;
+
+        var template = Pdf.Create()
+            .WithTheme(theme)
+            .AddPage(p => p.Body(b => b.Table(t => t
+                .Column("Col1")
+                .Row("Data"))))
+            .Build();
+
+        var element = template.Pages[0].Body.Elements[0] as TableElement;
+        Assert.Equal(7d, element!.DataFontSize);
     }
 
     [Fact]

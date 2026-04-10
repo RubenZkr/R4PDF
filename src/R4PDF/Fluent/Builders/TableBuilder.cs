@@ -110,6 +110,7 @@ public class TableBuilder
                 FontWeight = _tableTheme.HeaderFontWeight,
                 FontSize = _tableTheme.HeaderFontSize
             };
+            element.DataFontSize = _tableTheme.DataFontSize;
             element.AlternateRowColors = _tableTheme.AlternateRowColors;
             element.AlternateColor = _tableTheme.AlternateColor;
             element.Borders = new BorderStyle

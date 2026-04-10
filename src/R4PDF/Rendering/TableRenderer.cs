@@ -173,7 +173,9 @@ public class TableRenderer
     {
         var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
         var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
-        var font = new XFont(fontFamily, PdfDefaults.TableDataFontSize, fontStyle);
+        var fontSize = table.DataFontSize ?? PdfDefaults.TableDataFontSize;
+        var font = new XFont(fontFamily, fontSize, fontStyle);
+        var cellPadding = GetDataCellPadding(table);
         var lineHeight = font.Height;
         var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
         var maxLines = 1;
@@ -181,13 +183,13 @@ public class TableRenderer
         for (var i = 0; i < cellCount; i++)
         {
             var cellText = row.Cells[i] ?? "";
-            var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
+            var cellWidth = columnWidths[i] - cellPadding * 2;
             var wrapped = WrapText(gfx, cellText, font, cellWidth);
             if (wrapped.Count > maxLines)
                 maxLines = wrapped.Count;
         }
 
-        return lineHeight * maxLines + DefaultCellPadding * 2;
+        return lineHeight * maxLines + cellPadding * 2;
     }
 
     private double RenderHeaderRow(XGraphics gfx, TableElement table, double[] columnWidths, double x, double y,
@@ -253,7 +255,9 @@ public class TableRenderer
     {
         var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
         var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
-        var font = new XFont(fontFamily, PdfDefaults.TableDataFontSize, fontStyle);
+        var fontSize = table.DataFontSize ?? PdfDefaults.TableDataFontSize;
+        var font = new XFont(fontFamily, fontSize, fontStyle);
+        var cellPadding = GetDataCellPadding(table);
         var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
         var lineHeight = font.Height;
 
@@ -264,13 +268,13 @@ public class TableRenderer
         for (var i = 0; i < cellCount; i++)
         {
             var cellText = row.Cells[i] ?? "";
-            var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
+            var cellWidth = columnWidths[i] - cellPadding * 2;
             wrappedCells[i] = WrapText(gfx, cellText, font, cellWidth);
             if (wrappedCells[i].Count > maxLines)
                 maxLines = wrappedCells[i].Count;
         }
 
-        var rowHeight = lineHeight * maxLines + DefaultCellPadding * 2;
+        var rowHeight = lineHeight * maxLines + cellPadding * 2;
         var currentX = x;
 
         if (rowBackground != null)
@@ -284,8 +288,8 @@ public class TableRenderer
 
             for (var li = 0; li < lines.Count; li++)
             {
-                var lineRect = new XRect(currentX + DefaultCellPadding, y + DefaultCellPadding + li * lineHeight,
-                    columnWidths[i] - DefaultCellPadding * 2, lineHeight);
+                var lineRect = new XRect(currentX + cellPadding, y + cellPadding + li * lineHeight,
+                    columnWidths[i] - cellPadding * 2, lineHeight);
                 gfx.DrawString(lines[li], font, textBrush, lineRect, format);
             }
 
@@ -296,6 +300,14 @@ public class TableRenderer
         }
 
         return rowHeight;
+    }
+
+    private static double GetDataCellPadding(TableElement table)
+    {
+        var dataFontSize = table.DataFontSize ?? PdfDefaults.TableDataFontSize;
+        var scale = dataFontSize / PdfDefaults.TableDataFontSize;
+
+        return Math.Max(1d, DefaultCellPadding * scale);
     }
 
     private static XPen? ResolveBorderPen(BorderStyle? borders, bool noBorders = false)
@@ -371,6 +383,7 @@ public class TableRenderer
             Width = source.Width,
             Height = source.Height,
             ShowHeader = source.ShowHeader,
+            DataFontSize = source.DataFontSize,
             AlternateRowColors = source.AlternateRowColors,
             AlternateColor = source.AlternateColor,
             NoBorders = source.NoBorders,
