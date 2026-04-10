@@ -284,6 +284,8 @@ public class PdfGenerator
                 Width = table.Width,
                 Height = table.Height,
                 ShowHeader = table.ShowHeader,
+                DataFontSize = table.DataFontSize,
+                NoBorders = table.NoBorders,
                 AlternateRowColors = table.AlternateRowColors,
                 AlternateColor = table.AlternateColor,
                 HeaderStyle = table.HeaderStyle == null

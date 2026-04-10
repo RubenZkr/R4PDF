@@ -1,5 +1,13 @@
 # Release Notes
 
+## 1.1.3 - 2026-04-10
+
+### Highlights
+- Fixed `DataFontSize` and `NoBorders` not being preserved when `TableElement` is cloned during auto-pagination (`PdfGenerator.CloneElement` and `PageRenderer.CloneElement`).
+
+### Tests
+- Added propagation test verifying `DataFontSize` is preserved through auto-pagination cloning.
+
 ## 1.1.2 - 2026-04-10
 
 ### Highlights
