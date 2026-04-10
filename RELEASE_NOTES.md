@@ -1,5 +1,15 @@
 # Release Notes
 
+## 1.1.2 - 2026-04-10
+
+### Highlights
+- Fixed table data font-size application so `TableTheme.DataFontSize` is used during table row rendering.
+- Scaled table data row height with data font size to prevent oversized rows with small text.
+
+### Tests
+- Added PDF generation test with custom table data font size.
+- Added propagation test for table data font size from theme to rendered table element.
+
 ## 1.1.1 - 2026-04-08
 
 ### Highlights
