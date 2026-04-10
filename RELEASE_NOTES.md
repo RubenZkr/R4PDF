@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.1.4 - 2026-04-10
+
+### Highlights
+- Rebuild release to ensure the distributed NuGet binaries include the `DataFontSize`/`NoBorders` clone preservation fix used during auto-pagination.
+
 ## 1.1.3 - 2026-04-10
 
 ### Highlights
