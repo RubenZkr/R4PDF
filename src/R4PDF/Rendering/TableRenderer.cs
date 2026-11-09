@@ -290,14 +290,15 @@ public class TableRenderer
             var alignment = i < table.Columns.Count ? table.Columns[i].Alignment : null;
             var format = GetCellFormat(alignment);
             var top = y + cellPadding + (middle ? (contentHeight - cell.Height) / 2 : 0);
-            var inset = BadgeInset(cellStyle);
+            var indent = Indent(cellStyle);
+            var inset = BadgeInset(cellStyle) + indent;
 
             if (cellStyle?.BackgroundColor != null)
             {
                 var background = new XSolidBrush(ColorParser.Parse(cellStyle.BackgroundColor));
                 if (cellStyle.Badge)
-                    DrawBadge(gfx, background, cellStyle.DotColor, cell, format, currentX + cellPadding, top,
-                        columnWidths[i] - cellPadding * 2);
+                    DrawBadge(gfx, background, cellStyle.DotColor, cell, format, currentX + cellPadding + indent, top,
+                        columnWidths[i] - cellPadding * 2 - indent);
                 else
                     gfx.DrawRectangle(background, currentX, y, columnWidths[i], rowHeight);
             }
@@ -322,6 +323,20 @@ public class TableRenderer
                     var baseline = lineTop + line.Max(segment => Ascent(segment.Font));
                     foreach (var segment in line)
                     {
+                        if (segment.Background != null)
+                        {
+                            var chipHeight = segment.Font.GetHeight() + ChipPaddingY * 2;
+                            var chipTop = lineTop + (lineHeight - chipHeight) / 2;
+                            gfx.DrawRoundedRectangle(segment.Background, lineX, chipTop, segment.Width, chipHeight,
+                                chipHeight * 0.6, chipHeight * 0.6);
+                            gfx.DrawString(segment.Text, segment.Font, segment.Brush, lineX + ChipPaddingX, baseline,
+                                BaselineFormat);
+                            if (segment.Run is { } chipRun)
+                                Recorder?.Record(chipRun.Anchor, chipRun.Link, new XRect(lineX, lineTop, segment.Width, lineHeight));
+                            lineX += segment.Width;
+                            continue;
+                        }
+
                         gfx.DrawString(segment.Text, segment.Font, segment.Brush, lineX, baseline, BaselineFormat);
                         if (segment.Run is { } run)
                             Recorder?.Record(run.Anchor, run.Link, new XRect(lineX, lineTop, segment.Width, lineHeight));
@@ -414,10 +429,44 @@ public class TableRenderer
         gfx.DrawLine(pen, from, baseline, to, baseline);
     }
 
+    /// <summary>
+    ///     A run with a background as a single chip: the spaces before it as a gap, then the chip, on the
+    ///     next line when it does not fit.
+    /// </summary>
+    private static void AddChip(XGraphics gfx, TextRun run, XFont font, XBrush brush, double maxWidth,
+        List<List<Segment>> lines, ref double lineWidth)
+    {
+        var text = run.Text ?? string.Empty;
+        var label = text.TrimStart();
+        var gap = lines[^1].Count == 0 ? string.Empty : text[..(text.Length - label.Length)];
+        var gapWidth = gap.Length == 0 ? 0 : gfx.MeasureString(gap, font).Width;
+        var width = gfx.MeasureString(label, font).Width + ChipPaddingX * 2;
+
+        if (lineWidth + gapWidth + width > maxWidth && lines[^1].Count > 0)
+        {
+            lines.Add(new List<Segment>());
+            lineWidth = 0;
+            gap = string.Empty;
+            gapWidth = 0;
+        }
+
+        if (gapWidth > 0)
+            lines[^1].Add(new Segment(gap, font, brush, gapWidth));
+
+        lines[^1].Add(new Segment(label, font, brush, width, run, new XSolidBrush(ColorParser.Parse(run.BackgroundColor))));
+        lineWidth += gapWidth + width;
+    }
+
     private static double Ascent(XFont font) => font.GetHeight() * font.CellAscent / font.CellSpace;
 
     /// <summary>A piece of a line of a cell, with its font, color and width.</summary>
-    private sealed record Segment(string Text, XFont Font, XBrush Brush, double Width, TextRun? Run = null);
+    private sealed record Segment(string Text, XFont Font, XBrush Brush, double Width, TextRun? Run = null,
+        XBrush? Background = null);
+
+    /// <summary>Room between the text of a chip and the edge of its label.</summary>
+    private const double ChipPaddingX = 3;
+
+    private const double ChipPaddingY = 1;
 
     /// <summary>The lines of a cell and their heights; a line of a plain cell is a single segment.</summary>
     private sealed record CellLayout(List<List<Segment>> Lines, List<double> LineHeights, double TextWidth, bool IsRuns)
@@ -461,6 +510,12 @@ public class TableRenderer
                 run.FontSize ?? cellStyle.FontSize ?? table.DataFontSize ?? PdfDefaults.TableDataFontSize,
                 run.IsBold ?? cellStyle.IsBold ?? row.IsBold ? XFontStyle.Bold : XFontStyle.Regular);
             XBrush brush = run.Color != null ? new XSolidBrush(ColorParser.Parse(run.Color)) : cellBrush;
+
+            if (run.BackgroundColor != null)
+            {
+                AddChip(gfx, run, font, brush, maxWidth, lines, ref lineWidth);
+                continue;
+            }
 
             var parts = (run.Text ?? string.Empty).Replace("\r\n", "\n").Split('\n');
             for (var p = 0; p < parts.Length; p++)
@@ -513,9 +568,11 @@ public class TableRenderer
     /// <summary>The width the text of a cell wraps in; a badge keeps room for its padding.</summary>
     private static double TextWidth(double columnWidth, double cellPadding, TableCellStyle? cellStyle)
     {
-        var inset = cellStyle?.Badge == true ? BadgeInset(cellStyle) + BadgePaddingX : 0;
+        var inset = (cellStyle?.Badge == true ? BadgeInset(cellStyle) + BadgePaddingX : 0) + Indent(cellStyle);
         return Math.Max(1, columnWidth - cellPadding * 2 - inset);
     }
+
+    private static double Indent(TableCellStyle? cellStyle) => UnitConverter.ToPoints(cellStyle?.Indent, 0);
 
     /// <summary>Where the text of a badge starts: after its padding and its dot.</summary>
     private static double BadgeInset(TableCellStyle? cellStyle) =>

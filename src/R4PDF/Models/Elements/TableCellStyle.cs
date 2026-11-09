@@ -38,6 +38,9 @@ public class TableCellStyle
     public string? BorderBottomColor { get; set; }
 
     public string? BorderBottomWidth { get; set; }
+
+    /// <summary>Moves the content of the cell to the right, as a tree indents its children.</summary>
+    public string? Indent { get; set; }
 }
 
 /// <summary>A piece of text in a cell with its own style; see <see cref="TableCellStyle.Runs" />.</summary>
@@ -47,6 +50,12 @@ public class TextRun
     public double? FontSize { get; set; }
     public bool? IsBold { get; set; }
     public string? Color { get; set; }
+
+    /// <summary>
+    ///     Draws the run as a chip: a rounded label of this color behind its text, kept on one line. Spaces
+    ///     before the text stay outside the chip.
+    /// </summary>
+    public string? BackgroundColor { get; set; }
 
     /// <summary>Names the place of the run; see <see cref="PdfElement.Anchor" />. Each word of the run reports its area.</summary>
     public string? Anchor { get; set; }

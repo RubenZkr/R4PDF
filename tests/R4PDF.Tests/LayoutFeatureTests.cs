@@ -211,6 +211,27 @@ public class LayoutFeatureTests
         Assert.Equal("x", clone.Rows[0].CellStyles![0]!.Runs![0].Text);
     }
 
+    [Fact]
+    public void Table_ChipRun_StaysOnOneLineAndIndentNarrowsTheCell()
+    {
+        var chip = new TextRun { Text = " Enig aandeelhouder", BackgroundColor = "#E6ECF7", IsBold = true };
+        var oneLine = MeasureRunsRow(new TextRun { Text = "Naam" }, chip);
+        Assert.True(oneLine < 30, "a chip that fits stays on the line of the text before it");
+
+        var table = new TableElement
+        {
+            Columns = { new TableColumn { Name = "A", Width = "100%" } },
+            Rows = { new TableRow { Cells = { "Voorbeeld Holding B.V. met een lange naam" }, CellStyles = new List<TableCellStyle?> { new() { Indent = "60mm" } } } },
+            ShowHeader = false,
+        };
+        using var document = new PdfDocument();
+        using var gfx = XGraphics.FromPdfPage(document.AddPage());
+        var indented = new TableRenderer().Measure(gfx, table, new StyleResolver(null).Resolve(table), 200).Full;
+        table.Rows[0].CellStyles![0]!.Indent = null;
+        var flat = new TableRenderer().Measure(gfx, table, new StyleResolver(null).Resolve(table), 200).Full;
+        Assert.True(indented > flat, "the indent leaves less room, so the text wraps");
+    }
+
     private static double MeasureRunsRow(params TextRun[] runs)
     {
         var table = new TableElement
