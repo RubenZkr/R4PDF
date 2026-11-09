@@ -161,6 +161,17 @@ Multi-line text with automatic word wrapping.
 }
 ```
 
+A row can style single cells over its own style with `cellStyles` (one entry per column, `null` keeps the row style). With `badge` the background is a rounded label around the text, for a status:
+
+```json
+{
+    "cells": ["WWFT", "Mogelijke match"],
+    "cellStyles": [null, { "backgroundColor": "#FEF0E5", "textColor": "#A84500", "isBold": true, "badge": true }]
+}
+```
+
+A word that is wider than its column is broken inside, so long file names and identifiers stay within the column.
+
 #### Image
 
 ```json
@@ -199,6 +210,33 @@ Supports: base64 data URIs, file paths.
     "cornerRadius": "3mm"
 }
 ```
+
+#### Canvas
+
+A drawing area for diagrams. Its elements are positioned relative to the top-left corner of the canvas and do not move the layout cursor; the canvas takes up its `height` (or, without one, down to its lowest element) and moves to the next page as a whole.
+
+```json
+{
+    "type": "canvas",
+    "height": "60mm",
+    "elements": [
+        { "type": "rectangle", "x": "10mm", "y": "5mm", "width": "40mm", "height": "15mm", "fillColor": "#152A62", "cornerRadius": "2mm" },
+        { "type": "paragraph", "x": "10mm", "y": "9mm", "width": "40mm", "content": "Example B.V.", "alignment": "center", "color": "#FFFFFF" },
+        { "type": "line", "x1": "30mm", "y1": "20mm", "x2": "30mm", "y2": "40mm", "color": "#445581" }
+    ]
+}
+```
+
+#### Anchors and links
+
+Every element and table row accepts an `anchor` (a name for where it is rendered) and a `link`: `"#name"` jumps to the page of that anchor, any other value is opened as a URL.
+
+```json
+{ "type": "paragraph", "content": "Appendix", "anchor": "appendix" }
+{ "type": "table", "columns": [{ "name": "Contents" }], "rows": [{ "cells": ["Appendix"], "link": "#appendix" }] }
+```
+
+`GenerateWithLayout` reports the page and area of every anchor (see the API reference).
 
 ### Styles
 
@@ -259,6 +297,12 @@ generator.GenerateToStream(templateJson, dataJson, outputStream);
 // Generate to file
 generator.GenerateToFile(templateJson, "output.pdf");
 generator.GenerateToFile(templateJson, dataJson, "output.pdf");
+
+// Generate and report where every anchor was rendered (page index and area in points,
+// measured from the top-left corner), e.g. to link to it from another document
+PdfRenderResult result = generator.GenerateWithLayout(templateJson);
+foreach (var anchor in result.Anchors)
+    Console.WriteLine($"{anchor.Name}: page {anchor.PageIndex + 1}");
 ```
 
 ## Building
