@@ -12,6 +12,11 @@ public class TableElement : PdfElement
     public BorderStyle? Borders { get; set; }
     public bool NoBorders { get; set; }
 
+    /// <summary>
+    ///     Where the content of a cell sits when its row is taller: "top" (default) or "middle".
+    /// </summary>
+    public string? VerticalAlignment { get; set; }
+
     public override PdfElement Clone()
     {
         return CloneWithRows(Rows.Select(row => row.Clone()).ToList());

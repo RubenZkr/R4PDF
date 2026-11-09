@@ -164,6 +164,67 @@ public class LayoutFeatureTests
         Assert.Equal(Points(40), result.Anchors.Single().Height, 1);
     }
 
+    [Fact]
+    public void Table_CellWithRuns_TakesALinePerNewlineInTheTallestFontOfEachLine()
+    {
+        var oneLine = MeasureRunsRow(new TextRun { Text = "Naam", FontSize = 14, IsBold = true });
+        var twoLines = MeasureRunsRow(
+            new TextRun { Text = "Naam", FontSize = 14, IsBold = true },
+            new TextRun { Text = "  geb. 1 januari 1970", FontSize = 9 },
+            new TextRun { Text = "\nProfiel", FontSize = 9 },
+            new TextRun { Text = " 17", FontSize = 9, IsBold = true, Color = "#1570C9" });
+
+        Assert.True(twoLines > oneLine * 1.4, $"the newline starts a second line ({twoLines} vs {oneLine})");
+    }
+
+    [Fact]
+    public void Table_RunsLeaderDotAndBorder_RenderWithAutoPagination()
+    {
+        var pdf = _generator.Generate("""
+            {
+                "settings": { "autoPagination": { "enabled": true } },
+                "pages": [{ "body": { "elements": [{
+                    "type": "table",
+                    "showHeader": false,
+                    "verticalAlignment": "middle",
+                    "columns": [{ "name": "A", "width": "70%" }, { "name": "B", "width": "20%" }, { "name": "C", "width": "10%", "alignment": "right" }],
+                    "rows": [{
+                        "cells": ["", "Geen hits", "4"],
+                        "cellStyles": [
+                            { "runs": [{ "text": "Dossier", "fontSize": 15, "isBold": true }, { "text": "  2", "color": "#5B6478" }], "leader": true, "borderBottomColor": "#13285E", "borderBottomWidth": "1.2pt" },
+                            { "badge": true, "backgroundColor": "#E2F3E9", "dotColor": "#2E9E5B", "fontSize": 8 },
+                            { "isBold": true }
+                        ]
+                    }]
+                }] } }]
+            }
+            """);
+
+        using var document = PdfReader.Open(new MemoryStream(pdf), PdfDocumentOpenMode.Import);
+        Assert.Equal(1, document.PageCount);
+        var clone = (TableElement)TemplateParser.Parse("""
+            { "pages": [{ "body": { "elements": [{ "type": "table", "verticalAlignment": "middle", "columns": [{ "name": "A" }],
+              "rows": [{ "cells": [""], "cellStyles": [{ "runs": [{ "text": "x" }], "leader": true }] }] }] } }] }
+            """).Pages[0].Body.Elements[0].Clone();
+        Assert.Equal("middle", clone.VerticalAlignment);
+        Assert.True(clone.Rows[0].CellStyles![0]!.Leader);
+        Assert.Equal("x", clone.Rows[0].CellStyles![0]!.Runs![0].Text);
+    }
+
+    private static double MeasureRunsRow(params TextRun[] runs)
+    {
+        var table = new TableElement
+        {
+            Columns = { new TableColumn { Name = "A", Width = "100%" } },
+            Rows = { new TableRow { Cells = { "" }, CellStyles = new List<TableCellStyle?> { new() { Runs = runs.ToList() } } } },
+            ShowHeader = false,
+        };
+
+        using var document = new PdfDocument();
+        using var gfx = XGraphics.FromPdfPage(document.AddPage());
+        return new TableRenderer().Measure(gfx, table, new StyleResolver(null).Resolve(table), 480).Full;
+    }
+
     private static double MeasureRow(string cell)
     {
         var table = new TableElement
