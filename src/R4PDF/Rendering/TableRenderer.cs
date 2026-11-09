@@ -508,7 +508,8 @@ public class TableRenderer
         {
             var font = new XFont(style?.FontFamily ?? FontFamilies.Helvetica,
                 run.FontSize ?? cellStyle.FontSize ?? table.DataFontSize ?? PdfDefaults.TableDataFontSize,
-                run.IsBold ?? cellStyle.IsBold ?? row.IsBold ? XFontStyle.Bold : XFontStyle.Regular);
+                (run.IsBold ?? cellStyle.IsBold ?? row.IsBold ? XFontStyle.Bold : XFontStyle.Regular)
+                | (run.IsItalic == true ? XFontStyle.Italic : XFontStyle.Regular));
             XBrush brush = run.Color != null ? new XSolidBrush(ColorParser.Parse(run.Color)) : cellBrush;
 
             if (run.BackgroundColor != null)

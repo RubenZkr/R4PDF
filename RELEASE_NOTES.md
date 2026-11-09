@@ -8,6 +8,7 @@
 - Long words no longer run over the edge of their column or paragraph. A word wider than a line on its own (a file name, an identifier, a URL) is broken inside, after a separator such as `_`, `-` or `/` when there is one. Paragraphs and table cells share one wrapper (`TextWrapper`), and table cells now honour newlines.
 - Per-cell styles on table rows: `cellStyles` holds a `backgroundColor`, `textColor` and `isBold` per cell over the style of the row. With `badge: true` the background is a rounded label around the text instead of a filled cell, to show a status.
 - Anchors and links: every element and table row can carry an `anchor` and a `link`. `PdfGenerator.GenerateWithLayout` returns the PDF with the page and area (in points, from the top-left corner) of every anchor, so a document that is merged with others can link into it or point a table of contents at a heading in the middle of it. A `link` of `"#name"` jumps to the page of that anchor, any other value is opened as a URL.
+- Text runs in a cell (`cellStyles[].runs`) can be set in italics with `isItalic: true`, for a reference row or a remark.
 - New `canvas` element: a drawing area in the flow of the page whose elements are positioned relative to its top-left corner (lines with `x1`/`y1`/`x2`/`y2` too) and do not move the layout cursor. Only the canvas takes up room: its `height`, or without one the bottom of its lowest element. With auto-pagination it moves to the next page as a whole. Meant for diagrams.
 
 ### Fixes

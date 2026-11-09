@@ -49,6 +49,10 @@ public class TextRun
     public string Text { get; set; } = string.Empty;
     public double? FontSize { get; set; }
     public bool? IsBold { get; set; }
+
+    /// <summary>Sets the run in the italic face of the font, for a reference or a remark.</summary>
+    public bool? IsItalic { get; set; }
+
     public string? Color { get; set; }
 
     /// <summary>
