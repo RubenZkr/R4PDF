@@ -26,6 +26,8 @@
     <ItemGroup>
         <None Include="../../README.md" Pack="true" PackagePath="\"/>
         <PackageReference Include="PdfSharpCore" Version="1.3.67"/>
+        <!-- PdfSharpCore pulls in ImageSharp 1.0.4, which has known vulnerabilities; pin a patched 2.1.x (Apache-2.0). -->
+        <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13"/>
     </ItemGroup>
 
 </Project>
