@@ -177,6 +177,14 @@ public class PageRenderer
                 break;
             }
 
+            if (element.KeepWithNext && bodyConsumedAnyContent
+                && KeepWithNextHeight(gfx, section.Elements, i, contentWidth, pageNumber, pageCount) > availableHeight)
+            {
+                overflow.Add(CloneElement(element));
+                AppendRemainingOverflow(section, i + 1, overflow);
+                break;
+            }
+
             switch (element)
             {
                 case ParagraphElement paragraph:
@@ -245,6 +253,40 @@ public class PageRenderer
         return (rendered, overflow, bodyConsumedAnyContent);
     }
 
+    /// <summary>
+    ///     The height needed to keep the chain of elements from <paramref name="index" /> on (all with
+    ///     <see cref="PdfElement.KeepWithNext" />) together with the start of the element after it.
+    /// </summary>
+    private double KeepWithNextHeight(XGraphics gfx, IReadOnlyList<PdfElement> elements, int index, double contentWidth,
+        int pageNumber, int pageCount)
+    {
+        var height = 0d;
+        var next = index;
+        for (; next < elements.Count && elements[next].KeepWithNext; next++)
+            height += MeasureHeights(gfx, elements[next], contentWidth, pageNumber, pageCount).Full;
+
+        if (next < elements.Count)
+            height += MeasureHeights(gfx, elements[next], contentWidth, pageNumber, pageCount).Start;
+
+        return height;
+    }
+
+    private (double Full, double Start) MeasureHeights(XGraphics gfx, PdfElement element, double contentWidth,
+        int pageNumber, int pageCount)
+    {
+        switch (element)
+        {
+            case ParagraphElement paragraph:
+                return _paragraphRenderer.Measure(gfx, ResolveParagraphPlaceholders(paragraph, pageNumber, pageCount),
+                    _styleResolver.Resolve(paragraph), contentWidth);
+            case TableElement table:
+                return _tableRenderer.Measure(gfx, table, _styleResolver.Resolve(table), contentWidth);
+            default:
+                var height = MeasureElementHeight(gfx, element, contentWidth, pageNumber, pageCount);
+                return (height, height);
+        }
+    }
+
     private static void AppendRemainingOverflow(SectionDefinition section, int startIndex, List<PdfElement> overflow)
     {
         for (var j = startIndex; j < section.Elements.Count; j++)
@@ -300,6 +342,7 @@ public class PageRenderer
             Text = resolvedText,
             Style = text.Style,
             InlineStyle = text.InlineStyle,
+            KeepWithNext = text.KeepWithNext,
             X = text.X,
             Y = text.Y,
             Width = text.Width,
@@ -355,6 +398,7 @@ public class PageRenderer
         {
             Style = paragraph.Style,
             InlineStyle = paragraph.InlineStyle,
+            KeepWithNext = paragraph.KeepWithNext,
             X = paragraph.X,
             Y = paragraph.Y,
             Width = paragraph.Width,
@@ -400,6 +444,7 @@ public class PageRenderer
             {
                 Style = text.Style,
                 InlineStyle = text.InlineStyle,
+                KeepWithNext = text.KeepWithNext,
                 X = text.X,
                 Y = text.Y,
                 Width = text.Width,
@@ -415,6 +460,7 @@ public class PageRenderer
             {
                 Style = paragraph.Style,
                 InlineStyle = paragraph.InlineStyle,
+                KeepWithNext = paragraph.KeepWithNext,
                 X = paragraph.X,
                 Y = paragraph.Y,
                 Width = paragraph.Width,
@@ -439,6 +485,7 @@ public class PageRenderer
             {
                 Style = table.Style,
                 InlineStyle = table.InlineStyle,
+                KeepWithNext = table.KeepWithNext,
                 X = table.X,
                 Y = table.Y,
                 Width = table.Width,
@@ -479,13 +526,15 @@ public class PageRenderer
                 {
                     Cells = r.Cells.ToList(),
                     BackgroundColor = r.BackgroundColor,
-                    TextColor = r.TextColor
+                    TextColor = r.TextColor,
+                    IsBold = r.IsBold
                 }).ToList()
             },
             ImageElement image => new ImageElement
             {
                 Style = image.Style,
                 InlineStyle = image.InlineStyle,
+                KeepWithNext = image.KeepWithNext,
                 X = image.X,
                 Y = image.Y,
                 Width = image.Width,
@@ -498,6 +547,7 @@ public class PageRenderer
             {
                 Style = line.Style,
                 InlineStyle = line.InlineStyle,
+                KeepWithNext = line.KeepWithNext,
                 X = line.X,
                 Y = line.Y,
                 Width = line.Width,
@@ -514,6 +564,7 @@ public class PageRenderer
             {
                 Style = rect.Style,
                 InlineStyle = rect.InlineStyle,
+                KeepWithNext = rect.KeepWithNext,
                 X = rect.X,
                 Y = rect.Y,
                 Width = rect.Width,

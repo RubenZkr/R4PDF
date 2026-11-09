@@ -33,6 +33,34 @@ public class PdfGeneratorIntegrationTests
     }
 
     [Fact]
+    public void Generate_TableRowIsBold_RendersTheRowInTheBoldFace()
+    {
+        // The only bold text in this document is the bold table row, so a bold font face in the
+        // output proves IsBold survived the element cloning that auto-pagination does before rendering.
+        var template = """
+                       {
+                           "settings": { "autoPagination": { "enabled": true } },
+                           "pages": [{
+                               "body": {
+                                   "elements": [
+                                       {
+                                           "type": "table",
+                                           "columns": [{ "name": "A", "width": "100%" }],
+                                           "rows": [{ "cells": ["Vet"], "isBold": true }],
+                                           "showHeader": false
+                                       }
+                                   ]
+                               }
+                           }]
+                       }
+                       """;
+
+        var pdf = System.Text.Encoding.ASCII.GetString(_generator.Generate(template));
+
+        Assert.Contains("Bold", pdf);
+    }
+
+    [Fact]
     public void Generate_WithStyles_ProducesPdf()
     {
         var template = """

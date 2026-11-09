@@ -1,5 +1,15 @@
 # Release Notes
 
+## 1.1.5 - 2026-11-06
+
+### Highlights
+- New `keepWithNext` on every element: with auto-pagination, an element (typically a heading) moves to the next page when it does not fit together with the start of the element after it (the first line of a paragraph, or the header and first row of a table). A chain of elements that all keep with next moves as a whole; on a page that holds nothing yet the element is rendered regardless. Templates for earlier versions ignore the property.
+- Fixed `IsBold` on table rows being dropped when `TableElement` is cloned during auto-pagination (`PdfGenerator.CloneElement` and `PageRenderer.CloneElement`), so bold rows rendered in the regular face.
+
+### Tests
+- Added tests for `keepWithNext`: a heading that fits without its table moves along with it, without the flag only the table moves, and on an empty page the element is rendered anyway.
+- Added an integration test that renders a bold table row with auto-pagination enabled and checks the bold face is used.
+
 ## 1.1.4 - 2026-04-10
 
 ### Highlights

@@ -20,6 +20,24 @@ public class ParagraphRenderer
         return result.HeightUsed;
     }
 
+    /// <summary>
+    ///     The height of the whole paragraph and of its start (spacing before and the first line), without
+    ///     drawing it; used to keep a heading together with the paragraph that follows it.
+    /// </summary>
+    public (double Full, double Start) Measure(XGraphics gfx, ParagraphElement element, ResolvedStyle style,
+        double availableWidth)
+    {
+        var font = style.ToXFont();
+        var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : availableWidth;
+        var lineHeight = style.LineHeight * style.FontSize;
+        var spaceBefore = element.Spacing?.Before != null ? UnitConverter.ToPoints(element.Spacing.Before) : 0;
+        var spaceAfter = element.Spacing?.After != null ? UnitConverter.ToPoints(element.Spacing.After) : 0;
+
+        var lines = WrapText(gfx, element.Content, font, width);
+        var full = spaceBefore + lines.Count * lineHeight + spaceAfter;
+        return (full, lines.Count > 1 ? spaceBefore + lineHeight : full);
+    }
+
     public SplitRenderResult RenderWithContinuation(XGraphics gfx, ParagraphElement element, ResolvedStyle style,
         double x, double y, double availableWidth, double availableHeight, bool allowSplit)
     {
@@ -106,6 +124,7 @@ public class ParagraphRenderer
         {
             Style = source.Style,
             InlineStyle = source.InlineStyle,
+            KeepWithNext = source.KeepWithNext,
             X = source.X,
             Y = source.Y,
             Width = source.Width,

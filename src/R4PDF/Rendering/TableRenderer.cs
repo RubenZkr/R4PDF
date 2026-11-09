@@ -23,6 +23,23 @@ public class TableRenderer
         return result.HeightUsed;
     }
 
+    /// <summary>
+    ///     The height of the whole table and of its start (the header and the first row), without drawing
+    ///     it; used to keep a heading together with the table that follows it.
+    /// </summary>
+    public (double Full, double Start) Measure(XGraphics gfx, TableElement table, ResolvedStyle style,
+        double availableWidth)
+    {
+        if (table.Columns.Count == 0)
+            return (0, 0);
+
+        var columnWidths = CalculateColumnWidths(table, availableWidth);
+        var headerHeight = table.ShowHeader ? MeasureHeaderHeight(gfx, table, columnWidths) : 0;
+        var full = headerHeight + MeasureRowsHeight(gfx, table, columnWidths, 0, table.Rows.Count, style);
+        var start = headerHeight + (table.Rows.Count > 0 ? MeasureDataRowHeight(gfx, table, table.Rows[0], columnWidths, style) : 0);
+        return (full, start);
+    }
+
     public SplitRenderResult RenderWithContinuation(XGraphics gfx, TableElement table, ResolvedStyle style,
         double x, double y, double availableWidth, double availableHeight, bool allowSplit)
     {
@@ -378,6 +395,7 @@ public class TableRenderer
         {
             Style = source.Style,
             InlineStyle = source.InlineStyle,
+            KeepWithNext = source.KeepWithNext,
             X = source.X,
             Y = source.Y,
             Width = source.Width,

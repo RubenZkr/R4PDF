@@ -240,6 +240,7 @@ public class PdfGenerator
             {
                 Style = text.Style,
                 InlineStyle = text.InlineStyle,
+                KeepWithNext = text.KeepWithNext,
                 X = text.X,
                 Y = text.Y,
                 Width = text.Width,
@@ -255,6 +256,7 @@ public class PdfGenerator
             {
                 Style = paragraph.Style,
                 InlineStyle = paragraph.InlineStyle,
+                KeepWithNext = paragraph.KeepWithNext,
                 X = paragraph.X,
                 Y = paragraph.Y,
                 Width = paragraph.Width,
@@ -279,6 +281,7 @@ public class PdfGenerator
             {
                 Style = table.Style,
                 InlineStyle = table.InlineStyle,
+                KeepWithNext = table.KeepWithNext,
                 X = table.X,
                 Y = table.Y,
                 Width = table.Width,
@@ -319,13 +322,15 @@ public class PdfGenerator
                 {
                     Cells = r.Cells.ToList(),
                     BackgroundColor = r.BackgroundColor,
-                    TextColor = r.TextColor
+                    TextColor = r.TextColor,
+                    IsBold = r.IsBold
                 }).ToList()
             },
             Models.Elements.ImageElement image => new Models.Elements.ImageElement
             {
                 Style = image.Style,
                 InlineStyle = image.InlineStyle,
+                KeepWithNext = image.KeepWithNext,
                 X = image.X,
                 Y = image.Y,
                 Width = image.Width,
@@ -338,6 +343,7 @@ public class PdfGenerator
             {
                 Style = line.Style,
                 InlineStyle = line.InlineStyle,
+                KeepWithNext = line.KeepWithNext,
                 X = line.X,
                 Y = line.Y,
                 Width = line.Width,
@@ -354,6 +360,7 @@ public class PdfGenerator
             {
                 Style = rect.Style,
                 InlineStyle = rect.InlineStyle,
+                KeepWithNext = rect.KeepWithNext,
                 X = rect.X,
                 Y = rect.Y,
                 Width = rect.Width,
