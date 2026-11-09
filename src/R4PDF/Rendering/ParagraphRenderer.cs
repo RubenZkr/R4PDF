@@ -33,7 +33,7 @@ public class ParagraphRenderer
         var spaceBefore = element.Spacing?.Before != null ? UnitConverter.ToPoints(element.Spacing.Before) : 0;
         var spaceAfter = element.Spacing?.After != null ? UnitConverter.ToPoints(element.Spacing.After) : 0;
 
-        var lines = WrapText(gfx, element.Content, font, width);
+        var lines = TextWrapper.Wrap(gfx, element.Content, font, width);
         var full = spaceBefore + lines.Count * lineHeight + spaceAfter;
         return (full, lines.Count > 1 ? spaceBefore + lineHeight : full);
     }
@@ -54,19 +54,19 @@ public class ParagraphRenderer
         if (element.Spacing?.After != null)
             spaceAfter = UnitConverter.ToPoints(element.Spacing.After);
 
-        var lines = WrapText(gfx, element.Content, font, width);
+        var lines = TextWrapper.Wrap(gfx, element.Content, font, width);
         var fullHeight = spaceBefore + lines.Count * lineHeight + spaceAfter;
 
         if (!allowSplit)
         {
             if (fullHeight > availableHeight)
-                return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = CloneParagraph(element) };
+                return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = (ParagraphElement)element.Clone() };
 
             RenderLines(gfx, lines, font, brush, style, x, y, width, lineHeight, spaceBefore);
             return new SplitRenderResult
             {
                 HeightUsed = fullHeight,
-                RenderedPart = CloneParagraph(element),
+                RenderedPart = (ParagraphElement)element.Clone(),
                 Remainder = null
             };
         }
@@ -77,7 +77,7 @@ public class ParagraphRenderer
             return new SplitRenderResult
             {
                 HeightUsed = fullHeight,
-                RenderedPart = CloneParagraph(element),
+                RenderedPart = (ParagraphElement)element.Clone(),
                 Remainder = null
             };
         }
@@ -86,7 +86,7 @@ public class ParagraphRenderer
         var maxLines = usableHeight > 0 ? (int)Math.Floor(usableHeight / lineHeight) : 0;
 
         if (maxLines <= 0)
-            return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = CloneParagraph(element) };
+            return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = (ParagraphElement)element.Clone() };
 
         if (maxLines > lines.Count)
             maxLines = lines.Count;
@@ -99,8 +99,8 @@ public class ParagraphRenderer
         return new SplitRenderResult
         {
             HeightUsed = spaceBefore + renderedLines.Count * lineHeight,
-            RenderedPart = CloneParagraph(element, string.Join("\n", renderedLines)),
-            Remainder = remainingLines.Count > 0 ? CloneParagraph(element, string.Join("\n", remainingLines)) : null
+            RenderedPart = element.CloneWithContent(string.Join("\n", renderedLines)),
+            Remainder = remainingLines.Count > 0 ? element.CloneWithContent(string.Join("\n", remainingLines)) : null
         };
     }
 
@@ -116,76 +116,5 @@ public class ParagraphRenderer
             gfx.DrawString(line, font, brush, rect, format);
             currentY += lineHeight;
         }
-    }
-
-    private static ParagraphElement CloneParagraph(ParagraphElement source, string? content = null)
-    {
-        return new ParagraphElement
-        {
-            Style = source.Style,
-            InlineStyle = source.InlineStyle,
-            KeepWithNext = source.KeepWithNext,
-            X = source.X,
-            Y = source.Y,
-            Width = source.Width,
-            Height = source.Height,
-            Content = content ?? source.Content,
-            FontFamily = source.FontFamily,
-            FontSize = source.FontSize,
-            FontWeight = source.FontWeight,
-            Color = source.Color,
-            Alignment = source.Alignment,
-            LineHeight = source.LineHeight,
-            Spacing = source.Spacing == null
-                ? null
-                : new SpacingSettings
-                {
-                    Before = source.Spacing.Before,
-                    After = source.Spacing.After,
-                    LineHeight = source.Spacing.LineHeight
-                }
-        };
-    }
-
-    private static List<string> WrapText(XGraphics gfx, string text, XFont font, double maxWidth)
-    {
-        var lines = new List<string>();
-        if (string.IsNullOrEmpty(text))
-            return lines;
-
-        var paragraphs = text.Split('\n');
-
-        foreach (var paragraph in paragraphs)
-        {
-            if (string.IsNullOrWhiteSpace(paragraph))
-            {
-                lines.Add(string.Empty);
-                continue;
-            }
-
-            var words = paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var currentLine = "";
-
-            foreach (var word in words)
-            {
-                var testLine = currentLine.Length == 0 ? word : $"{currentLine} {word}";
-                var size = gfx.MeasureString(testLine, font);
-
-                if (size.Width > maxWidth && currentLine.Length > 0)
-                {
-                    lines.Add(currentLine);
-                    currentLine = word;
-                }
-                else
-                {
-                    currentLine = testLine;
-                }
-            }
-
-            if (currentLine.Length > 0)
-                lines.Add(currentLine);
-        }
-
-        return lines;
     }
 }

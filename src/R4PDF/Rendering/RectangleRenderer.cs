@@ -13,8 +13,9 @@ public class RectangleRenderer
             ? UnitConverter.ToPoints(element.Height)
             : PdfDefaults.DefaultRectangleHeight;
 
-        var drawX = element.X != null ? UnitConverter.ToPoints(element.X) : x;
-        var drawY = element.Y != null ? UnitConverter.ToPoints(element.Y) : y;
+        // The page renderer has resolved X and Y already, relative to the canvas the rectangle may be in.
+        var drawX = x;
+        var drawY = y;
 
         XBrush? fillBrush = element.FillColor != null
             ? new XSolidBrush(ColorParser.Parse(element.FillColor))

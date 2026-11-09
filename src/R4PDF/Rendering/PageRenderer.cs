@@ -25,10 +25,22 @@ public class PageRenderer
     private readonly StyleResolver _styleResolver;
     private readonly TableRenderer _tableRenderer = new();
     private readonly TextRenderer _textRenderer = new();
+    private LayoutRecorder? _recorder;
 
     public PageRenderer(StyleResolver styleResolver)
     {
         _styleResolver = styleResolver;
+    }
+
+    /// <summary>Records anchors and links; set for the final render pass only, not for the layout passes.</summary>
+    internal LayoutRecorder? Recorder
+    {
+        get => _recorder;
+        set
+        {
+            _recorder = value;
+            _tableRenderer.Recorder = value;
+        }
     }
 
     public void Render(XGraphics gfx, PageDefinition page, PageSettings documentSettings, int pageNumber, int pageCount)
@@ -172,7 +184,7 @@ public class PageRenderer
 
             if (availableHeight <= 0)
             {
-                overflow.Add(CloneElement(element));
+                overflow.Add(element.Clone());
                 AppendRemainingOverflow(section, i + 1, overflow);
                 break;
             }
@@ -180,7 +192,7 @@ public class PageRenderer
             if (element.KeepWithNext && bodyConsumedAnyContent
                 && KeepWithNextHeight(gfx, section.Elements, i, contentWidth, pageNumber, pageCount) > availableHeight)
             {
-                overflow.Add(CloneElement(element));
+                overflow.Add(element.Clone());
                 AppendRemainingOverflow(section, i + 1, overflow);
                 break;
             }
@@ -196,14 +208,14 @@ public class PageRenderer
 
                     if (splitResult.RenderedPart != null)
                     {
-                        rendered.Add(CloneElement(splitResult.RenderedPart));
+                        rendered.Add(splitResult.RenderedPart.Clone());
                         totalHeight += splitResult.HeightUsed;
                         bodyConsumedAnyContent = true;
                     }
 
                     if (splitResult.Remainder != null)
                     {
-                        overflow.Add(CloneElement(splitResult.Remainder));
+                        overflow.Add(splitResult.Remainder.Clone());
                         AppendRemainingOverflow(section, i + 1, overflow);
                         i = section.Elements.Count;
                     }
@@ -217,14 +229,14 @@ public class PageRenderer
 
                     if (splitResult.RenderedPart != null)
                     {
-                        rendered.Add(CloneElement(splitResult.RenderedPart));
+                        rendered.Add(splitResult.RenderedPart.Clone());
                         totalHeight += splitResult.HeightUsed;
                         bodyConsumedAnyContent = true;
                     }
 
                     if (splitResult.Remainder != null)
                     {
-                        overflow.Add(CloneElement(splitResult.Remainder));
+                        overflow.Add(splitResult.Remainder.Clone());
                         AppendRemainingOverflow(section, i + 1, overflow);
                         i = section.Elements.Count;
                     }
@@ -236,14 +248,14 @@ public class PageRenderer
                     var elementHeight = MeasureElementHeight(gfx, element, contentWidth, pageNumber, pageCount);
                     if (elementHeight > availableHeight)
                     {
-                        overflow.Add(CloneElement(element));
+                        overflow.Add(element.Clone());
                         AppendRemainingOverflow(section, i + 1, overflow);
                         i = section.Elements.Count;
                         break;
                     }
 
                     totalHeight += RenderElement(gfx, element, x, y + totalHeight, contentWidth, pageNumber, pageCount);
-                    rendered.Add(CloneElement(element));
+                    rendered.Add(element.Clone());
                     bodyConsumedAnyContent = true;
                     break;
                 }
@@ -290,7 +302,7 @@ public class PageRenderer
     private static void AppendRemainingOverflow(SectionDefinition section, int startIndex, List<PdfElement> overflow)
     {
         for (var j = startIndex; j < section.Elements.Count; j++)
-            overflow.Add(CloneElement(section.Elements[j]));
+            overflow.Add(section.Elements[j].Clone());
     }
 
     private double MeasureElementHeight(XGraphics gfx, PdfElement element, double contentWidth, int pageNumber,
@@ -306,6 +318,7 @@ public class PageRenderer
             RectangleElement rect => rect.Height != null
                 ? UnitConverter.ToPoints(rect.Height)
                 : PdfDefaults.DefaultRectangleHeight,
+            CanvasElement canvas => MeasureCanvasHeight(gfx, canvas, contentWidth, pageNumber, pageCount),
             _ => 0
         };
     }
@@ -315,19 +328,78 @@ public class PageRenderer
     {
         var drawX = element.X != null ? UnitConverter.ToPoints(element.X) : x;
         var drawY = element.Y != null ? UnitConverter.ToPoints(element.Y) : y;
+        return RenderElementAt(gfx, element, drawX, drawY, contentWidth, pageNumber, pageCount);
+    }
+
+    /// <summary>
+    ///     Renders an element at a resolved position and records its anchor and link. Lines with absolute
+    ///     coordinates are moved by <paramref name="originX" /> and <paramref name="originY" />, the corner
+    ///     of the canvas they are in.
+    /// </summary>
+    private double RenderElementAt(XGraphics gfx, PdfElement element, double x, double y, double contentWidth,
+        int pageNumber, int pageCount, double originX = 0, double originY = 0)
+    {
         var style = _styleResolver.Resolve(element);
 
-        return element switch
+        var height = element switch
         {
-            TextElement text => RenderText(gfx, text, style, drawX, drawY, contentWidth, pageNumber, pageCount),
-            ParagraphElement para => RenderParagraph(gfx, para, style, drawX, drawY, contentWidth, pageNumber,
+            TextElement text => RenderText(gfx, text, style, x, y, contentWidth, pageNumber, pageCount),
+            ParagraphElement para => RenderParagraph(gfx, para, style, x, y, contentWidth, pageNumber,
                 pageCount),
-            TableElement table => _tableRenderer.Render(gfx, table, style, drawX, drawY, contentWidth),
-            ImageElement image => _imageRenderer.Render(gfx, image, drawX, drawY, contentWidth),
-            LineElement line => _lineRenderer.Render(gfx, line, drawX, drawY, contentWidth),
-            RectangleElement rect => _rectangleRenderer.Render(gfx, rect, drawX, drawY, contentWidth),
+            TableElement table => _tableRenderer.Render(gfx, table, style, x, y, contentWidth),
+            ImageElement image => _imageRenderer.Render(gfx, image, x, y, contentWidth),
+            LineElement line => _lineRenderer.Render(gfx, line, x, y, contentWidth, originX, originY),
+            RectangleElement rect => _rectangleRenderer.Render(gfx, rect, x, y, contentWidth),
+            CanvasElement canvas => RenderCanvas(gfx, canvas, x, y, contentWidth, pageNumber, pageCount),
             _ => 0
         };
+
+        var width = element.Width != null ? UnitConverter.ToPoints(element.Width) : contentWidth;
+        _recorder?.Record(element.Anchor, element.Link, new XRect(x, y, width, height));
+        return height;
+    }
+
+    /// <summary>
+    ///     The elements of a canvas, each at its position relative to the corner of the canvas. Only the
+    ///     canvas itself takes up room in the flow of the page.
+    /// </summary>
+    private double RenderCanvas(XGraphics gfx, CanvasElement canvas, double x, double y, double contentWidth,
+        int pageNumber, int pageCount)
+    {
+        var width = canvas.Width != null ? UnitConverter.ToPoints(canvas.Width) : contentWidth;
+
+        foreach (var child in canvas.Elements)
+        {
+            var left = child.X != null ? UnitConverter.ToPoints(child.X) : 0;
+            var top = child.Y != null ? UnitConverter.ToPoints(child.Y) : 0;
+            RenderElementAt(gfx, child, x + left, y + top, Math.Max(0, width - left), pageNumber, pageCount, x, y);
+        }
+
+        return MeasureCanvasHeight(gfx, canvas, contentWidth, pageNumber, pageCount);
+    }
+
+    /// <summary>The height of the canvas, or without one the bottom of its lowest element.</summary>
+    private double MeasureCanvasHeight(XGraphics gfx, CanvasElement canvas, double contentWidth, int pageNumber,
+        int pageCount)
+    {
+        if (canvas.Height != null)
+            return UnitConverter.ToPoints(canvas.Height);
+
+        var width = canvas.Width != null ? UnitConverter.ToPoints(canvas.Width) : contentWidth;
+        var bottom = 0d;
+
+        foreach (var child in canvas.Elements)
+        {
+            var left = child.X != null ? UnitConverter.ToPoints(child.X) : 0;
+            var top = child.Y != null ? UnitConverter.ToPoints(child.Y) : 0;
+            var childBottom = child is LineElement { Y1: not null, Y2: not null } line
+                ? Math.Max(UnitConverter.ToPoints(line.Y1), UnitConverter.ToPoints(line.Y2))
+                  + UnitConverter.ToPoints(line.StrokeWidth, PdfDefaults.DefaultStrokeWidth)
+                : top + MeasureHeights(gfx, child, Math.Max(0, width - left), pageNumber, pageCount).Full;
+            bottom = Math.Max(bottom, childBottom);
+        }
+
+        return bottom;
     }
 
     private double MeasureTextHeight(XGraphics gfx, TextElement text, ResolvedStyle style, double contentWidth,
@@ -337,22 +409,8 @@ public class PageRenderer
             .Replace(Placeholders.PageNumber, pageNumber.ToString())
             .Replace(Placeholders.PageCount, pageCount.ToString());
 
-        var resolved = new TextElement
-        {
-            Text = resolvedText,
-            Style = text.Style,
-            InlineStyle = text.InlineStyle,
-            KeepWithNext = text.KeepWithNext,
-            X = text.X,
-            Y = text.Y,
-            Width = text.Width,
-            Height = text.Height,
-            FontFamily = text.FontFamily,
-            FontSize = text.FontSize,
-            FontWeight = text.FontWeight,
-            Color = text.Color,
-            Alignment = text.Alignment
-        };
+        var resolved = (TextElement)text.Clone();
+        resolved.Text = resolvedText;
 
         return _textRenderer.MeasureHeight(gfx, resolved, style, contentWidth);
     }
@@ -394,33 +452,9 @@ public class PageRenderer
     private static ParagraphElement ResolveParagraphPlaceholders(ParagraphElement paragraph, int pageNumber,
         int pageCount)
     {
-        return new ParagraphElement
-        {
-            Style = paragraph.Style,
-            InlineStyle = paragraph.InlineStyle,
-            KeepWithNext = paragraph.KeepWithNext,
-            X = paragraph.X,
-            Y = paragraph.Y,
-            Width = paragraph.Width,
-            Height = paragraph.Height,
-            Content = paragraph.Content
-                .Replace(Placeholders.PageNumber, pageNumber.ToString())
-                .Replace(Placeholders.PageCount, pageCount.ToString()),
-            FontFamily = paragraph.FontFamily,
-            FontSize = paragraph.FontSize,
-            FontWeight = paragraph.FontWeight,
-            Color = paragraph.Color,
-            Alignment = paragraph.Alignment,
-            LineHeight = paragraph.LineHeight,
-            Spacing = paragraph.Spacing == null
-                ? null
-                : new SpacingSettings
-                {
-                    Before = paragraph.Spacing.Before,
-                    After = paragraph.Spacing.After,
-                    LineHeight = paragraph.Spacing.LineHeight
-                }
-        };
+        return paragraph.CloneWithContent(paragraph.Content
+            .Replace(Placeholders.PageNumber, pageNumber.ToString())
+            .Replace(Placeholders.PageCount, pageCount.ToString()));
     }
 
     private static SectionDefinition? CloneSection(SectionDefinition? source)
@@ -432,149 +466,7 @@ public class PageRenderer
         {
             Height = source.Height,
             Background = source.Background,
-            Elements = source.Elements.Select(CloneElement).ToList()
-        };
-    }
-
-    private static PdfElement CloneElement(PdfElement source)
-    {
-        return source switch
-        {
-            TextElement text => new TextElement
-            {
-                Style = text.Style,
-                InlineStyle = text.InlineStyle,
-                KeepWithNext = text.KeepWithNext,
-                X = text.X,
-                Y = text.Y,
-                Width = text.Width,
-                Height = text.Height,
-                Text = text.Text,
-                FontFamily = text.FontFamily,
-                FontSize = text.FontSize,
-                FontWeight = text.FontWeight,
-                Color = text.Color,
-                Alignment = text.Alignment
-            },
-            ParagraphElement paragraph => new ParagraphElement
-            {
-                Style = paragraph.Style,
-                InlineStyle = paragraph.InlineStyle,
-                KeepWithNext = paragraph.KeepWithNext,
-                X = paragraph.X,
-                Y = paragraph.Y,
-                Width = paragraph.Width,
-                Height = paragraph.Height,
-                Content = paragraph.Content,
-                FontFamily = paragraph.FontFamily,
-                FontSize = paragraph.FontSize,
-                FontWeight = paragraph.FontWeight,
-                Color = paragraph.Color,
-                Alignment = paragraph.Alignment,
-                LineHeight = paragraph.LineHeight,
-                Spacing = paragraph.Spacing == null
-                    ? null
-                    : new SpacingSettings
-                    {
-                        Before = paragraph.Spacing.Before,
-                        After = paragraph.Spacing.After,
-                        LineHeight = paragraph.Spacing.LineHeight
-                    }
-            },
-            TableElement table => new TableElement
-            {
-                Style = table.Style,
-                InlineStyle = table.InlineStyle,
-                KeepWithNext = table.KeepWithNext,
-                X = table.X,
-                Y = table.Y,
-                Width = table.Width,
-                Height = table.Height,
-                ShowHeader = table.ShowHeader,
-                DataFontSize = table.DataFontSize,
-                NoBorders = table.NoBorders,
-                AlternateRowColors = table.AlternateRowColors,
-                AlternateColor = table.AlternateColor,
-                HeaderStyle = table.HeaderStyle == null
-                    ? null
-                    : new PdfStyle
-                    {
-                        FontFamily = table.HeaderStyle.FontFamily,
-                        FontSize = table.HeaderStyle.FontSize,
-                        FontWeight = table.HeaderStyle.FontWeight,
-                        FontStyle = table.HeaderStyle.FontStyle,
-                        Color = table.HeaderStyle.Color,
-                        BackgroundColor = table.HeaderStyle.BackgroundColor,
-                        Alignment = table.HeaderStyle.Alignment,
-                        LineHeight = table.HeaderStyle.LineHeight
-                    },
-                Borders = table.Borders == null
-                    ? null
-                    : new BorderStyle
-                    {
-                        Type = table.Borders.Type,
-                        Color = table.Borders.Color,
-                        Width = table.Borders.Width
-                    },
-                Columns = table.Columns.Select(c => new TableColumn
-                {
-                    Name = c.Name,
-                    Width = c.Width,
-                    Alignment = c.Alignment
-                }).ToList(),
-                Rows = table.Rows.Select(r => new TableRow
-                {
-                    Cells = r.Cells.ToList(),
-                    BackgroundColor = r.BackgroundColor,
-                    TextColor = r.TextColor,
-                    IsBold = r.IsBold
-                }).ToList()
-            },
-            ImageElement image => new ImageElement
-            {
-                Style = image.Style,
-                InlineStyle = image.InlineStyle,
-                KeepWithNext = image.KeepWithNext,
-                X = image.X,
-                Y = image.Y,
-                Width = image.Width,
-                Height = image.Height,
-                Source = image.Source,
-                Alignment = image.Alignment,
-                MaintainAspectRatio = image.MaintainAspectRatio
-            },
-            LineElement line => new LineElement
-            {
-                Style = line.Style,
-                InlineStyle = line.InlineStyle,
-                KeepWithNext = line.KeepWithNext,
-                X = line.X,
-                Y = line.Y,
-                Width = line.Width,
-                Height = line.Height,
-                X1 = line.X1,
-                Y1 = line.Y1,
-                X2 = line.X2,
-                Y2 = line.Y2,
-                Color = line.Color,
-                StrokeWidth = line.StrokeWidth,
-                DashPattern = line.DashPattern
-            },
-            RectangleElement rect => new RectangleElement
-            {
-                Style = rect.Style,
-                InlineStyle = rect.InlineStyle,
-                KeepWithNext = rect.KeepWithNext,
-                X = rect.X,
-                Y = rect.Y,
-                Width = rect.Width,
-                Height = rect.Height,
-                FillColor = rect.FillColor,
-                StrokeColor = rect.StrokeColor,
-                StrokeWidth = rect.StrokeWidth,
-                CornerRadius = rect.CornerRadius
-            },
-            _ => throw new NotSupportedException($"Unsupported element type for cloning: {source.GetType().Name}")
+            Elements = source.Elements.Select(element => element.Clone()).ToList()
         };
     }
 }

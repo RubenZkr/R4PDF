@@ -10,4 +10,12 @@ public class ParagraphElement : PdfElement
     public string? Alignment { get; set; }
     public double? LineHeight { get; set; }
     public SpacingSettings? Spacing { get; set; }
+
+    /// <summary>A copy with other content, for the parts of a paragraph that is split over pages.</summary>
+    public ParagraphElement CloneWithContent(string content)
+    {
+        var clone = (ParagraphElement)Clone();
+        clone.Content = content;
+        return clone;
+    }
 }

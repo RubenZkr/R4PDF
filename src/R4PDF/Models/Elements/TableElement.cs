@@ -11,4 +11,18 @@ public class TableElement : PdfElement
     public string? AlternateColor { get; set; }
     public BorderStyle? Borders { get; set; }
     public bool NoBorders { get; set; }
+
+    public override PdfElement Clone()
+    {
+        return CloneWithRows(Rows.Select(row => row.Clone()).ToList());
+    }
+
+    /// <summary>A copy with other rows, for the parts of a table that is split over pages.</summary>
+    public TableElement CloneWithRows(List<TableRow> rows)
+    {
+        var clone = (TableElement)base.Clone();
+        clone.Columns = Columns.ToList();
+        clone.Rows = rows;
+        return clone;
+    }
 }

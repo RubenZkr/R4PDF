@@ -32,6 +32,28 @@ public class PdfGenerator
     }
 
     /// <summary>
+    ///     Generates a PDF from a JSON template and reports where every element or table row with an
+    ///     <c>anchor</c> was rendered, for example to link to it from another document.
+    /// </summary>
+    public PdfRenderResult GenerateWithLayout(string templateJson, string? dataJson = null)
+    {
+        using var stream = new MemoryStream();
+        var anchors = Generate(() => RenderTemplate(TemplateParser.Parse(DataBinder.Bind(templateJson, dataJson)), stream));
+        return new PdfRenderResult(stream.ToArray(), anchors);
+    }
+
+    /// <summary>
+    ///     Generates a PDF from a PdfTemplate model and reports where every element or table row with an
+    ///     anchor was rendered.
+    /// </summary>
+    public PdfRenderResult GenerateWithLayout(PdfTemplate template)
+    {
+        using var stream = new MemoryStream();
+        var anchors = Generate(() => RenderTemplate(template, stream));
+        return new PdfRenderResult(stream.ToArray(), anchors);
+    }
+
+    /// <summary>
     ///     Generates a PDF from a JSON template and writes it to a stream.
     /// </summary>
     public void GenerateToStream(string templateJson, string? dataJson, Stream outputStream)
@@ -113,7 +135,23 @@ public class PdfGenerator
         File.WriteAllBytes(outputPath, bytes);
     }
 
-    private void RenderTemplate(PdfTemplate template, Stream outputStream)
+    private static IReadOnlyList<PdfAnchor> Generate(Func<IReadOnlyList<PdfAnchor>> render)
+    {
+        try
+        {
+            return render();
+        }
+        catch (PdfGenerationException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is not PdfGenerationException)
+        {
+            throw new PdfGenerationException($"Failed to generate PDF: {ex.Message}", ex);
+        }
+    }
+
+    private IReadOnlyList<PdfAnchor> RenderTemplate(PdfTemplate template, Stream outputStream)
     {
         using var document = CreatePdfDocument(template);
         var styleResolver = new StyleResolver(template.Styles);
@@ -125,6 +163,8 @@ public class PdfGenerator
             : template.Pages;
 
         var pageCount = pages.Count;
+        var recorder = new LayoutRecorder();
+        pageRenderer.Recorder = recorder;
 
         for (var i = 0; i < pages.Count; i++)
         {
@@ -134,11 +174,14 @@ public class PdfGenerator
             var pdfPage = document.AddPage();
             ConfigurePage(pdfPage, settings);
 
+            recorder.PageIndex = i;
             using var gfx = XGraphics.FromPdfPage(pdfPage);
             pageRenderer.Render(gfx, pageDefinition, template.Settings, i + 1, pageCount);
         }
 
+        recorder.AddLinks(document);
         document.Save(outputStream);
+        return recorder.Anchors;
     }
 
     private static List<PageDefinition> MaterializeAutoPaginatedPages(PdfTemplate template, PageRenderer pageRenderer)
@@ -228,149 +271,7 @@ public class PdfGenerator
         {
             Height = source.Height,
             Background = source.Background,
-            Elements = source.Elements.Select(CloneElement).ToList()
-        };
-    }
-
-    private static Models.Elements.PdfElement CloneElement(Models.Elements.PdfElement source)
-    {
-        return source switch
-        {
-            Models.Elements.TextElement text => new Models.Elements.TextElement
-            {
-                Style = text.Style,
-                InlineStyle = text.InlineStyle,
-                KeepWithNext = text.KeepWithNext,
-                X = text.X,
-                Y = text.Y,
-                Width = text.Width,
-                Height = text.Height,
-                Text = text.Text,
-                FontFamily = text.FontFamily,
-                FontSize = text.FontSize,
-                FontWeight = text.FontWeight,
-                Color = text.Color,
-                Alignment = text.Alignment
-            },
-            Models.Elements.ParagraphElement paragraph => new Models.Elements.ParagraphElement
-            {
-                Style = paragraph.Style,
-                InlineStyle = paragraph.InlineStyle,
-                KeepWithNext = paragraph.KeepWithNext,
-                X = paragraph.X,
-                Y = paragraph.Y,
-                Width = paragraph.Width,
-                Height = paragraph.Height,
-                Content = paragraph.Content,
-                FontFamily = paragraph.FontFamily,
-                FontSize = paragraph.FontSize,
-                FontWeight = paragraph.FontWeight,
-                Color = paragraph.Color,
-                Alignment = paragraph.Alignment,
-                LineHeight = paragraph.LineHeight,
-                Spacing = paragraph.Spacing == null
-                    ? null
-                    : new Models.Elements.SpacingSettings
-                    {
-                        Before = paragraph.Spacing.Before,
-                        After = paragraph.Spacing.After,
-                        LineHeight = paragraph.Spacing.LineHeight
-                    }
-            },
-            Models.Elements.TableElement table => new Models.Elements.TableElement
-            {
-                Style = table.Style,
-                InlineStyle = table.InlineStyle,
-                KeepWithNext = table.KeepWithNext,
-                X = table.X,
-                Y = table.Y,
-                Width = table.Width,
-                Height = table.Height,
-                ShowHeader = table.ShowHeader,
-                DataFontSize = table.DataFontSize,
-                NoBorders = table.NoBorders,
-                AlternateRowColors = table.AlternateRowColors,
-                AlternateColor = table.AlternateColor,
-                HeaderStyle = table.HeaderStyle == null
-                    ? null
-                    : new PdfStyle
-                    {
-                        FontFamily = table.HeaderStyle.FontFamily,
-                        FontSize = table.HeaderStyle.FontSize,
-                        FontWeight = table.HeaderStyle.FontWeight,
-                        FontStyle = table.HeaderStyle.FontStyle,
-                        Color = table.HeaderStyle.Color,
-                        BackgroundColor = table.HeaderStyle.BackgroundColor,
-                        Alignment = table.HeaderStyle.Alignment,
-                        LineHeight = table.HeaderStyle.LineHeight
-                    },
-                Borders = table.Borders == null
-                    ? null
-                    : new BorderStyle
-                    {
-                        Type = table.Borders.Type,
-                        Color = table.Borders.Color,
-                        Width = table.Borders.Width
-                    },
-                Columns = table.Columns.Select(c => new Models.Elements.TableColumn
-                {
-                    Name = c.Name,
-                    Width = c.Width,
-                    Alignment = c.Alignment
-                }).ToList(),
-                Rows = table.Rows.Select(r => new Models.Elements.TableRow
-                {
-                    Cells = r.Cells.ToList(),
-                    BackgroundColor = r.BackgroundColor,
-                    TextColor = r.TextColor,
-                    IsBold = r.IsBold
-                }).ToList()
-            },
-            Models.Elements.ImageElement image => new Models.Elements.ImageElement
-            {
-                Style = image.Style,
-                InlineStyle = image.InlineStyle,
-                KeepWithNext = image.KeepWithNext,
-                X = image.X,
-                Y = image.Y,
-                Width = image.Width,
-                Height = image.Height,
-                Source = image.Source,
-                Alignment = image.Alignment,
-                MaintainAspectRatio = image.MaintainAspectRatio
-            },
-            Models.Elements.LineElement line => new Models.Elements.LineElement
-            {
-                Style = line.Style,
-                InlineStyle = line.InlineStyle,
-                KeepWithNext = line.KeepWithNext,
-                X = line.X,
-                Y = line.Y,
-                Width = line.Width,
-                Height = line.Height,
-                X1 = line.X1,
-                Y1 = line.Y1,
-                X2 = line.X2,
-                Y2 = line.Y2,
-                Color = line.Color,
-                StrokeWidth = line.StrokeWidth,
-                DashPattern = line.DashPattern
-            },
-            Models.Elements.RectangleElement rect => new Models.Elements.RectangleElement
-            {
-                Style = rect.Style,
-                InlineStyle = rect.InlineStyle,
-                KeepWithNext = rect.KeepWithNext,
-                X = rect.X,
-                Y = rect.Y,
-                Width = rect.Width,
-                Height = rect.Height,
-                FillColor = rect.FillColor,
-                StrokeColor = rect.StrokeColor,
-                StrokeWidth = rect.StrokeWidth,
-                CornerRadius = rect.CornerRadius
-            },
-            _ => throw new NotSupportedException($"Unsupported element type: {source.GetType().Name}")
+            Elements = source.Elements.Select(element => element.Clone()).ToList()
         };
     }
 

@@ -6,7 +6,10 @@ namespace R4PDF.Rendering;
 
 public class LineRenderer
 {
-    public double Render(XGraphics gfx, LineElement element, double x, double y, double availableWidth)
+    /// <param name="originX">Added to X1 and X2, for a line in a canvas.</param>
+    /// <param name="originY">Added to Y1 and Y2, for a line in a canvas.</param>
+    public double Render(XGraphics gfx, LineElement element, double x, double y, double availableWidth,
+        double originX = 0, double originY = 0)
     {
         var color = ColorParser.Parse(element.Color, XColors.Black);
         var strokeWidth = UnitConverter.ToPoints(element.StrokeWidth, PdfDefaults.DefaultStrokeWidth);
@@ -28,10 +31,10 @@ public class LineRenderer
         if (element.X1 != null && element.Y1 != null && element.X2 != null && element.Y2 != null)
         {
             // Absolute coordinates
-            x1 = UnitConverter.ToPoints(element.X1);
-            y1 = UnitConverter.ToPoints(element.Y1);
-            x2 = UnitConverter.ToPoints(element.X2);
-            y2 = UnitConverter.ToPoints(element.Y2);
+            x1 = originX + UnitConverter.ToPoints(element.X1);
+            y1 = originY + UnitConverter.ToPoints(element.Y1);
+            x2 = originX + UnitConverter.ToPoints(element.X2);
+            y2 = originY + UnitConverter.ToPoints(element.Y2);
         }
         else
         {

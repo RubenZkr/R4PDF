@@ -11,4 +11,5 @@ public static class ElementTypes
     public const string Image = "image";
     public const string Line = "line";
     public const string Rectangle = "rectangle";
+    public const string Canvas = "canvas";
 }

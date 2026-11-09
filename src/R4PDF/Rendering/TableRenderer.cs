@@ -16,6 +16,14 @@ public class TableRenderer
 
     private const double DefaultCellPadding = PdfDefaults.TableCellPadding;
 
+    /// <summary>Room between the text of a badge cell and the edge of its label.</summary>
+    private const double BadgePaddingX = 4;
+
+    private const double BadgePaddingY = 1.5;
+
+    /// <summary>Records the anchors and links of the rows; set during the final render pass only.</summary>
+    internal LayoutRecorder? Recorder { get; set; }
+
     public double Render(XGraphics gfx, TableElement table, ResolvedStyle style, double x, double y,
         double availableWidth)
     {
@@ -44,7 +52,7 @@ public class TableRenderer
         double x, double y, double availableWidth, double availableHeight, bool allowSplit)
     {
         if (table.Columns.Count == 0)
-            return new SplitRenderResult { HeightUsed = 0, RenderedPart = CloneTable(table), Remainder = null };
+            return new SplitRenderResult { HeightUsed = 0, RenderedPart = (TableElement)table.Clone(), Remainder = null };
 
         var columnWidths = CalculateColumnWidths(table, availableWidth);
         var currentY = y;
@@ -55,13 +63,13 @@ public class TableRenderer
 
         var headerHeight = table.ShowHeader ? MeasureHeaderHeight(gfx, table, columnWidths) : 0;
         if (table.ShowHeader && headerHeight > availableHeight)
-            return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = CloneTable(table) };
+            return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = (TableElement)table.Clone() };
 
         if (!allowSplit)
         {
             var fullHeight = headerHeight + MeasureRowsHeight(gfx, table, columnWidths, 0, table.Rows.Count, style);
             if (fullHeight > availableHeight)
-                return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = CloneTable(table) };
+                return new SplitRenderResult { HeightUsed = 0, RenderedPart = null, Remainder = (TableElement)table.Clone() };
         }
 
         if (table.ShowHeader)
@@ -78,9 +86,9 @@ public class TableRenderer
 
             if (rowHeight > remainingHeight)
             {
-                remainderRows.Add(CloneRow(row));
+                remainderRows.Add(row.Clone());
                 for (var j = i + 1; j < table.Rows.Count; j++)
-                    remainderRows.Add(CloneRow(table.Rows[j]));
+                    remainderRows.Add(table.Rows[j].Clone());
                 break;
             }
 
@@ -91,17 +99,18 @@ public class TableRenderer
                 rowBackground =
                     new XSolidBrush(ColorParser.Parse(table.AlternateColor, XColor.FromArgb(245, 245, 245)));
 
+            Recorder?.Record(row.Anchor, row.Link, new XRect(x, currentY, columnWidths.Sum(), rowHeight));
             currentY += RenderDataRow(gfx, table, row, columnWidths, x, currentY, borderPen, rowBackground, style);
             heightUsed += rowHeight;
-            renderedRows.Add(CloneRow(row));
+            renderedRows.Add(row.Clone());
         }
 
         var renderedPart = renderedRows.Count > 0 || table.ShowHeader
-            ? CloneTable(table, renderedRows)
+            ? table.CloneWithRows(renderedRows)
             : null;
 
         var remainder = remainderRows.Count > 0
-            ? CloneTable(table, remainderRows)
+            ? table.CloneWithRows(remainderRows)
             : null;
 
         return new SplitRenderResult
@@ -168,7 +177,7 @@ public class TableRenderer
         for (var i = 0; i < table.Columns.Count; i++)
         {
             var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
-            var wrapped = WrapText(gfx, table.Columns[i].Name, headerFont, cellWidth);
+            var wrapped = WrapCell(gfx, table.Columns[i].Name, headerFont, cellWidth);
             if (wrapped.Count > maxLines)
                 maxLines = wrapped.Count;
         }
@@ -188,20 +197,15 @@ public class TableRenderer
     private double MeasureDataRowHeight(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
         ResolvedStyle? style = null)
     {
-        var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
-        var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
-        var fontSize = table.DataFontSize ?? PdfDefaults.TableDataFontSize;
-        var font = new XFont(fontFamily, fontSize, fontStyle);
         var cellPadding = GetDataCellPadding(table);
-        var lineHeight = font.Height;
+        var lineHeight = CellFont(table, row, null, style).Height;
         var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
         var maxLines = 1;
 
         for (var i = 0; i < cellCount; i++)
         {
-            var cellText = row.Cells[i] ?? "";
-            var cellWidth = columnWidths[i] - cellPadding * 2;
-            var wrapped = WrapText(gfx, cellText, font, cellWidth);
+            var wrapped = WrapCell(gfx, row.Cells[i], CellFont(table, row, CellStyleAt(row, i), style),
+                TextWidth(columnWidths[i], cellPadding, CellStyleAt(row, i)));
             if (wrapped.Count > maxLines)
                 maxLines = wrapped.Count;
         }
@@ -236,7 +240,7 @@ public class TableRenderer
         for (var i = 0; i < table.Columns.Count; i++)
         {
             var cellWidth = columnWidths[i] - DefaultCellPadding * 2;
-            wrappedHeaders[i] = WrapText(gfx, table.Columns[i].Name, headerFont, cellWidth);
+            wrappedHeaders[i] = WrapCell(gfx, table.Columns[i].Name, headerFont, cellWidth);
             if (wrappedHeaders[i].Count > maxLines)
                 maxLines = wrappedHeaders[i].Count;
         }
@@ -270,13 +274,8 @@ public class TableRenderer
     private double RenderDataRow(XGraphics gfx, TableElement table, TableRow row, double[] columnWidths,
         double x, double y, XPen? borderPen, XBrush? rowBackground, ResolvedStyle? style = null)
     {
-        var fontFamily = style?.FontFamily ?? FontFamilies.Helvetica;
-        var fontStyle = row.IsBold ? XFontStyle.Bold : XFontStyle.Regular;
-        var fontSize = table.DataFontSize ?? PdfDefaults.TableDataFontSize;
-        var font = new XFont(fontFamily, fontSize, fontStyle);
         var cellPadding = GetDataCellPadding(table);
-        var textBrush = new XSolidBrush(ColorParser.Parse(row.TextColor, XColors.Black));
-        var lineHeight = font.Height;
+        var lineHeight = CellFont(table, row, null, style).Height;
 
         var cellCount = Math.Min(row.Cells.Count, table.Columns.Count);
         var wrappedCells = new List<string>[cellCount];
@@ -284,9 +283,8 @@ public class TableRenderer
 
         for (var i = 0; i < cellCount; i++)
         {
-            var cellText = row.Cells[i] ?? "";
-            var cellWidth = columnWidths[i] - cellPadding * 2;
-            wrappedCells[i] = WrapText(gfx, cellText, font, cellWidth);
+            wrappedCells[i] = WrapCell(gfx, row.Cells[i], CellFont(table, row, CellStyleAt(row, i), style),
+                TextWidth(columnWidths[i], cellPadding, CellStyleAt(row, i)));
             if (wrappedCells[i].Count > maxLines)
                 maxLines = wrappedCells[i].Count;
         }
@@ -299,14 +297,29 @@ public class TableRenderer
 
         for (var i = 0; i < cellCount; i++)
         {
+            var cellStyle = CellStyleAt(row, i);
+            var font = CellFont(table, row, cellStyle, style);
+            var textBrush = new XSolidBrush(ColorParser.Parse(cellStyle?.TextColor ?? row.TextColor, XColors.Black));
             var alignment = i < table.Columns.Count ? table.Columns[i].Alignment : null;
             var format = GetCellFormat(alignment);
             var lines = wrappedCells[i];
+            var inset = cellStyle?.Badge == true ? BadgePaddingX : 0;
+            var textWidth = TextWidth(columnWidths[i], cellPadding, cellStyle);
+
+            if (cellStyle?.BackgroundColor != null)
+            {
+                var background = new XSolidBrush(ColorParser.Parse(cellStyle.BackgroundColor));
+                if (cellStyle.Badge)
+                    DrawBadge(gfx, background, lines, font, format, currentX + cellPadding, y + cellPadding,
+                        columnWidths[i] - cellPadding * 2, lineHeight);
+                else
+                    gfx.DrawRectangle(background, currentX, y, columnWidths[i], rowHeight);
+            }
 
             for (var li = 0; li < lines.Count; li++)
             {
-                var lineRect = new XRect(currentX + cellPadding, y + cellPadding + li * lineHeight,
-                    columnWidths[i] - cellPadding * 2, lineHeight);
+                var lineRect = new XRect(currentX + cellPadding + inset, y + cellPadding + li * lineHeight,
+                    textWidth, lineHeight);
                 gfx.DrawString(lines[li], font, textBrush, lineRect, format);
             }
 
@@ -317,6 +330,58 @@ public class TableRenderer
         }
 
         return rowHeight;
+    }
+
+    /// <summary>
+    ///     A rounded label as wide as the longest line plus its padding, placed like the text (left, centred
+    ///     or right) within the content area of the cell.
+    /// </summary>
+    private static void DrawBadge(XGraphics gfx, XBrush brush, IReadOnlyList<string> lines, XFont font,
+        XStringFormat format, double left, double top, double width, double lineHeight)
+    {
+        if (lines.All(string.IsNullOrEmpty))
+            return;
+
+        var badgeWidth = Math.Min(width, lines.Max(line => gfx.MeasureString(line, font).Width) + BadgePaddingX * 2);
+        var badgeHeight = lines.Count * lineHeight + BadgePaddingY * 2;
+        var badgeX = format.Alignment switch
+        {
+            XStringAlignment.Center => left + (width - badgeWidth) / 2,
+            XStringAlignment.Far => left + width - badgeWidth,
+            _ => left
+        };
+
+        var corner = Math.Min(badgeHeight, lineHeight + BadgePaddingY * 2);
+        gfx.DrawRoundedRectangle(brush, badgeX, top - BadgePaddingY, badgeWidth, badgeHeight, corner, corner);
+    }
+
+    private static TableCellStyle? CellStyleAt(TableRow row, int index)
+    {
+        return row.CellStyles != null && index < row.CellStyles.Count ? row.CellStyles[index] : null;
+    }
+
+    /// <summary>The font of a cell: bold when its style says so, otherwise when its row is bold.</summary>
+    private static XFont CellFont(TableElement table, TableRow row, TableCellStyle? cellStyle, ResolvedStyle? style)
+    {
+        var bold = cellStyle?.IsBold ?? row.IsBold;
+        return new XFont(style?.FontFamily ?? FontFamilies.Helvetica, table.DataFontSize ?? PdfDefaults.TableDataFontSize,
+            bold ? XFontStyle.Bold : XFontStyle.Regular);
+    }
+
+    /// <summary>The width the text of a cell wraps in; a badge keeps room for its padding.</summary>
+    private static double TextWidth(double columnWidth, double cellPadding, TableCellStyle? cellStyle)
+    {
+        var inset = cellStyle?.Badge == true ? BadgePaddingX * 2 : 0;
+        return Math.Max(1, columnWidth - cellPadding * 2 - inset);
+    }
+
+    /// <summary>A cell always has at least one line, so an empty cell still has the height of a row.</summary>
+    private static List<string> WrapCell(XGraphics gfx, string? text, XFont font, double maxWidth)
+    {
+        var lines = TextWrapper.Wrap(gfx, text, font, maxWidth);
+        if (lines.Count == 0)
+            lines.Add(string.Empty);
+        return lines;
     }
 
     private static double GetDataCellPadding(TableElement table)
@@ -350,100 +415,5 @@ public class TableRenderer
             _ => XStringAlignment.Near
         };
         return format;
-    }
-
-    private static List<string> WrapText(XGraphics gfx, string text, XFont font, double maxWidth)
-    {
-        var lines = new List<string>();
-        if (string.IsNullOrEmpty(text))
-        {
-            lines.Add(string.Empty);
-            return lines;
-        }
-
-        var words = text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var currentLine = "";
-
-        foreach (var word in words)
-        {
-            var testLine = currentLine.Length == 0 ? word : $"{currentLine} {word}";
-            var size = gfx.MeasureString(testLine, font);
-
-            if (size.Width > maxWidth && currentLine.Length > 0)
-            {
-                lines.Add(currentLine);
-                currentLine = word;
-            }
-            else
-            {
-                currentLine = testLine;
-            }
-        }
-
-        if (currentLine.Length > 0)
-            lines.Add(currentLine);
-
-        if (lines.Count == 0)
-            lines.Add(string.Empty);
-
-        return lines;
-    }
-
-    private static TableElement CloneTable(TableElement source, List<TableRow>? rows = null)
-    {
-        return new TableElement
-        {
-            Style = source.Style,
-            InlineStyle = source.InlineStyle,
-            KeepWithNext = source.KeepWithNext,
-            X = source.X,
-            Y = source.Y,
-            Width = source.Width,
-            Height = source.Height,
-            ShowHeader = source.ShowHeader,
-            DataFontSize = source.DataFontSize,
-            AlternateRowColors = source.AlternateRowColors,
-            AlternateColor = source.AlternateColor,
-            NoBorders = source.NoBorders,
-            HeaderStyle = source.HeaderStyle == null
-                ? null
-                : new PdfStyle
-                {
-                    FontFamily = source.HeaderStyle.FontFamily,
-                    FontSize = source.HeaderStyle.FontSize,
-                    FontWeight = source.HeaderStyle.FontWeight,
-                    FontStyle = source.HeaderStyle.FontStyle,
-                    Color = source.HeaderStyle.Color,
-                    BackgroundColor = source.HeaderStyle.BackgroundColor,
-                    Alignment = source.HeaderStyle.Alignment,
-                    LineHeight = source.HeaderStyle.LineHeight
-                },
-            Borders = source.Borders == null
-                ? null
-                : new BorderStyle
-                {
-                    Type = source.Borders.Type,
-                    Color = source.Borders.Color,
-                    Width = source.Borders.Width
-                },
-            Columns = source.Columns.Select(c => new TableColumn
-            {
-                Name = c.Name,
-                Width = c.Width,
-                Alignment = c.Alignment
-            }).ToList(),
-            Rows = rows ?? source.Rows.Select(CloneRow).ToList()
-        };
-    }
-
-    private static TableRow CloneRow(TableRow source)
-    {
-        return new TableRow
-        {
-            Cells = source.Cells.ToList(),
-            BackgroundColor = source.BackgroundColor,
-            TextColor = source.TextColor,
-            IsBold = source.IsBold
-        };
     }
 }
