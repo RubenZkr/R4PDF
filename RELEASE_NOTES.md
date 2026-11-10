@@ -1,24 +1,29 @@
 # Release Notes
 
-## 1.2.0 - 2026-11-09
+## 1.2.0 - 2026-11-10
 
 1.1.5 was not published; its `keepWithNext` ships with this release.
 
 ### Highlights
 - Long words no longer run over the edge of their column or paragraph. A word wider than a line on its own (a file name, an identifier, a URL) is broken inside, after a separator such as `_`, `-` or `/` when there is one. Paragraphs and table cells share one wrapper (`TextWrapper`), and table cells now honour newlines.
-- Per-cell styles on table rows: `cellStyles` holds a `backgroundColor`, `textColor` and `isBold` per cell over the style of the row. With `badge: true` the background is a rounded label around the text instead of a filled cell, to show a status.
+- Per-cell styles on table rows: `cellStyles` holds a `backgroundColor`, `textColor`, `isBold` and `fontSize` per cell over the style of the row. With `badge: true` the background is a rounded label around the text instead of a filled cell, to show a status; `dotColor` puts a small dot before the text of the badge.
+- More cell styling: `leader: true` fills the rest of the last line with a dotted leader (with `leaderColor`), as a table of contents does before its page number; `borderBottomColor` and `borderBottomWidth` draw a line along the bottom of the cell to separate rows; `indent` moves the content to the right, as a tree indents its children.
+- Text runs in a cell: `cellStyles[].runs` replaces the cell text with pieces that each have their own `fontSize`, `isBold`, `isItalic` and `color` (a bold name followed by a muted date, for example). A newline in a run starts a new line and leading spaces are kept. A run with a `backgroundColor` is drawn as a chip that stays on one line, and a run can carry its own `anchor` and `link`.
+- Tables take a `verticalAlignment` of `"top"` (default) or `"middle"` for the content of cells in a taller row.
 - Anchors and links: every element and table row can carry an `anchor` and a `link`. `PdfGenerator.GenerateWithLayout` returns the PDF with the page and area (in points, from the top-left corner) of every anchor, so a document that is merged with others can link into it or point a table of contents at a heading in the middle of it. A `link` of `"#name"` jumps to the page of that anchor, any other value is opened as a URL.
-- Text runs in a cell (`cellStyles[].runs`) can be set in italics with `isItalic: true`, for a reference row or a remark.
 - New `canvas` element: a drawing area in the flow of the page whose elements are positioned relative to its top-left corner (lines with `x1`/`y1`/`x2`/`y2` too) and do not move the layout cursor. Only the canvas takes up room: its `height`, or without one the bottom of its lowest element. With auto-pagination it moves to the next page as a whole. Meant for diagrams.
 
 ### Fixes
 - A rectangle with an `x`/`y` was positioned twice from its own coordinates; it now uses the position the page renderer resolved, which is what makes it work inside a canvas.
 
+### Dependencies
+- `SixLabors.ImageSharp` is now referenced directly at 2.1.13. PdfSharpCore 1.3.67 pulls in ImageSharp 1.0.4, which has known vulnerabilities.
+
 ### Internal
 - Elements copy themselves with `PdfElement.Clone()` (a member-wise copy; tables, rows, paragraphs and canvases copy their lists). The four hand-written copies in `PdfGenerator`, `PageRenderer`, `TableRenderer` and `ParagraphRenderer` are gone; they were the cause of the `DataFontSize`, `NoBorders` and `IsBold` bugs fixed in 1.1.3 and 1.1.5, and a new property is now copied without extra code.
 
 ### Tests
-- Added `LayoutFeatureTests`: breaking long words in tables and paragraphs, cell styles surviving pagination, bold cell styles, anchors on continuation pages, links to anchors and the layout of a canvas.
+- Added `LayoutFeatureTests`: breaking long words in tables and paragraphs, cell styles surviving pagination, bold cell styles, anchors on continuation pages, links to anchors and the layout of a canvas, plus text runs, chips, leaders, dots, bottom borders and indents in cells.
 
 ### Upgrade Notes
 - Backward compatible. Text that used to overflow a narrow column now wraps, so such a row can get taller.

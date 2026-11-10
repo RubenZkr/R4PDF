@@ -16,7 +16,7 @@
         <RepositoryUrl>https://github.com/RubenZkr/R4PDF</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageReleaseNotes>1.2.0: long words break within their column, per-cell styles and badges, anchors with GenerateWithLayout and links, the canvas element for diagrams, and keepWithNext.</PackageReleaseNotes>
+        <PackageReleaseNotes>1.2.0: long words break within their column, per-cell styles, badges, text runs, leaders and vertical alignment in tables, anchors with GenerateWithLayout and links, the canvas element for diagrams, and keepWithNext. ImageSharp is pinned to 2.1.13 for known vulnerabilities in 1.0.4.</PackageReleaseNotes>
         <PackageTags>pdf;json;pdf-generation;template;report</PackageTags>
         <IsPackable>true</IsPackable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
